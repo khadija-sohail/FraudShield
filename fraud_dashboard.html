@@ -1,0 +1,4162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FraudShield â€” Fraud Detection & Case Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+
+
+
+/* ======================== */
+
+/* ======= CSS CODE======= */
+
+/* ======================= */
+
+
+<style>
+:root {
+  --bg-primary: #04060f;
+  --bg-secondary: #080c1a;
+  --bg-card: rgba(12, 18, 38, 0.85);
+  --bg-card-hover: rgba(16, 24, 52, 0.95);
+  --border: rgba(0, 200, 255, 0.12);
+  --border-bright: rgba(0, 200, 255, 0.35);
+  --neon-blue: #00c8ff;
+  --neon-green: #00ff9d;
+  --neon-red: #ff2d55;
+  --neon-orange: #ff6b2b;
+  --neon-yellow: #ffd60a;
+  --neon-purple: #bf5af2;
+  --text-primary: #e8f4fd;
+  --text-secondary: #7a9bb5;
+  --text-dim: #3d5a73;
+  --sidebar-width: 240px;
+  --topbar-height: 64px;
+  --font-display: 'Syne', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-ui: 'Space Mono', monospace;
+  --glow-blue: 0 0 20px rgba(0,200,255,0.4), 0 0 40px rgba(0,200,255,0.15);
+  --glow-red: 0 0 20px rgba(255,45,85,0.5), 0 0 40px rgba(255,45,85,0.2);
+  --glow-green: 0 0 20px rgba(0,255,157,0.4), 0 0 40px rgba(0,255,157,0.15);
+}
+
+
+/* ===== LIGHT MODE THEME ===== */
+body.light-mode{
+  --bg-primary: #f8fafc;
+  --bg-secondary: #e2e8f0;
+  --bg-card: rgba(255,255,255,0.92);
+  --bg-card-hover: rgba(255,255,255,1);
+
+  --border: rgba(15,23,42,0.08);
+  --border-bright: rgba(59,130,246,0.35);
+
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-dim: #94a3b8;
+
+  --neon-blue: #2563eb;
+  --neon-green: #16a34a;
+  --neon-red: #dc2626;
+  --neon-orange: #ea580c;
+  --neon-yellow: #ca8a04;
+  --neon-purple: #9333ea;
+
+  --glow-blue: 0 0 18px rgba(37,99,235,0.20);
+  --glow-red: 0 0 18px rgba(220,38,38,0.15);
+  --glow-green: 0 0 18px rgba(22,163,74,0.15);
+}
+
+/* smooth transition from light to dark and dark to light*/
+body,
+#sidebar,
+#topbar,
+.glass-card,
+.topbar-btn,
+.nav-item,
+input,
+button,
+table td,
+table th{
+  transition: all 0.25s ease;
+}
+
+
+
+
+
+
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-ui);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 10%, rgba(0,200,255,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(0,255,157,0.03) 0%, transparent 50%),
+    radial-gradient(ellipse 40% 30% at 60% 30%, rgba(191,90,242,0.03) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+
+
+
+/* ===== SIDEBAR ===== */
+#sidebar {
+  position: fixed;
+  top: 0; left: 0;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background: rgba(4, 8, 20, 0.97);
+  border-right: 1px solid var(--border);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  backdrop-filter: blur(20px);
+  overflow-y: auto;
+  transition: transform 0.3s ease;
+}
+
+.sidebar-logo {
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-icon {
+  width: 38px; height: 38px;
+  background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  box-shadow: var(--glow-blue);
+  flex-shrink: 0;
+}
+
+.logo-text {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: 0.5px;
+}
+.logo-sub { font-size: 9px; color: var(--text-secondary); letter-spacing: 2px; margin-top: 1px; }
+
+.sidebar-section {
+  padding: 16px 12px 8px;
+}
+
+.section-label {
+  font-size: 8px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+  padding: 0 8px;
+  margin-bottom: 6px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 12px;
+  color: var(--text-secondary);
+  border: 1px solid transparent;
+  margin-bottom: 2px;
+  position: relative;
+}
+
+.nav-item:hover {
+  background: rgba(0,200,255,0.07);
+  color: var(--text-primary);
+  border-color: var(--border);
+}
+
+.nav-item.active {
+  background: rgba(0,200,255,0.1);
+  color: var(--neon-blue);
+  border-color: rgba(0,200,255,0.25);
+  box-shadow: inset 0 0 20px rgba(0,200,255,0.05);
+}
+
+.nav-item i { width: 16px; text-align: center; font-size: 13px; }
+
+.nav-badge {
+  margin-left: auto;
+  background: var(--neon-red);
+  color: white;
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 10px;
+  font-weight: 700;
+  box-shadow: 0 0 8px rgba(255,45,85,0.5);
+}
+
+.nav-badge.green { background: var(--neon-green); color: #000; box-shadow: 0 0 8px rgba(0,255,157,0.5); }
+.nav-badge.blue { background: var(--neon-blue); color: #000; box-shadow: var(--glow-blue); }
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 12px;
+  border-top: 1px solid var(--border);
+}
+
+
+
+
+
+
+.analyst-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: rgba(0,200,255,0.06);
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+
+.analyst-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-family: var(--font-display);
+  font-weight: 800;
+}
+
+.analyst-name { font-size: 11px; font-weight: 600; color: var(--text-primary); }
+.analyst-role { font-size: 9px; color: var(--text-secondary); margin-top: 2px; }
+
+
+
+
+
+
+
+/* ===== TOPBAR ===== */
+#topbar {
+  position: fixed;
+  top: 0;
+  left: var(--sidebar-width);
+  right: 0;
+  height: var(--topbar-height);
+  background: rgba(4, 8, 20, 0.92);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  gap: 16px;
+}
+
+.topbar-title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+
+
+
+
+.topbar-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 12px;
+  width: 260px;
+  transition: all 0.2s;
+}
+
+.topbar-search:focus-within {
+  border-color: var(--border-bright);
+  background: rgba(0,200,255,0.06);
+}
+
+.topbar-search input {
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  width: 100%;
+}
+
+.topbar-search input::placeholder { color: var(--text-dim); }
+.topbar-search i { color: var(--text-dim); font-size: 12px; }
+
+
+
+
+
+
+
+
+.topbar-btn {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.03);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  font-size: 14px;
+}
+
+.topbar-btn:hover { border-color: var(--border-bright); color: var(--neon-purple); }
+
+.notif-dot {
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--neon-red);
+  box-shadow: 0 0 6px rgba(255,45,85,0.8);
+}
+
+
+
+
+
+
+.status-live {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  color: var(--neon-green);
+  padding: 4px 10px;
+  border: 1px solid rgba(0,255,157,0.25);
+  border-radius: 20px;
+  background: rgba(0,255,157,0.05);
+}
+
+.pulse-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--neon-green);
+  box-shadow: 0 0 10px var(--neon-green);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.7); }
+}
+
+
+
+
+
+
+/* ===== MAIN CONTENT ===== */
+#main {
+  margin-left: var(--sidebar-width);
+  padding-top: var(--topbar-height);
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
+.page {
+  display: none;
+  padding: 24px;
+  animation: fadeIn 0.3s ease;
+}
+
+.page.active { display: block; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
+
+/* ===== GLASSMORPHISM CARDS ===== */
+.glass-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  backdrop-filter: blur(16px);
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,200,255,0.3), transparent);
+}
+
+.glass-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-bright);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,200,255,0.1);
+}
+
+
+
+
+
+/* ===== KPI CARDS ===== */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.kpi-card {
+  padding: 18px 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.kpi-card::after {
+  content: '';
+  position: absolute;
+  top: -30px; right: -20px;
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  opacity: 0.06;
+}
+
+.kpi-card.blue::after { background: var(--neon-blue); }
+.kpi-card.green::after { background: var(--neon-blue); }
+.kpi-card.red::after { background: var(--neon-blue); }
+.kpi-card.orange::after { background: var(--neon-blue); }
+.kpi-card.purple::after { background: var(--neon-blue); }
+.kpi-card.yellow::after { background: var(--neon-blue); }
+
+.kpi-icon {
+  width: 36px; height: 36px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  margin-bottom: 12px;
+}
+
+.kpi-card.blue .kpi-icon { background: rgba(0,200,255,0.12); color: var(--neon-blue); }
+.kpi-card.blue .kpi-icon { background: rgba(0,255,157,0.12); color: var(--neon-blue); }
+.kpi-card.blue .kpi-icon { background: rgba(255,45,85,0.12); color: var(--neon-blue); }
+.kpi-card.blue .kpi-icon { background: rgba(255,107,43,0.12); color: var(--neon-blue); }
+.kpi-card.blue .kpi-icon { background: rgba(191,90,242,0.12); color: var(--neon-blue); }
+.kpi-card.blue .kpi-icon { background: rgba(255,214,10,0.12); color: var(--neon-blue); }
+
+.kpi-value {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.kpi-label {
+  font-size: 10px;
+  color: var(--text-secondary);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.kpi-trend {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+}
+
+.trend-up { color: var(--neon-red); }
+.trend-down { color: var(--neon-green); }
+.trend-neutral { color: var(--text-secondary); }
+
+
+
+
+
+
+/* ===== CHARTS GRID ===== */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.charts-grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.chart-card {
+  padding: 20px;
+}
+
+.chart-title {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.chart-subtitle {
+  font-size: 10px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.chart-container {
+  position: relative;
+  height: 220px;
+}
+
+.chart-container.tall { height: 280px; }
+.chart-container.short { height: 160px; }
+
+
+
+
+
+
+
+
+
+/* ===== TABLES ===== */
+.table-card {
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.table-filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filter-input {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 6px 10px;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.filter-input:focus {
+  border-color: var(--border-bright);
+  background: rgba(0,200,255,0.05);
+}
+
+.filter-input::placeholder { color: var(--text-dim); }
+
+select.filter-input option {
+  background: #080c1a;
+  color: var(--text-primary);
+}
+
+.btn {
+  padding: 6px 14px;
+  border-radius: 7px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-primary {
+  background: var(--neon-blue);
+  color: #000;
+  box-shadow: 0 0 15px rgba(0,200,255,0.35);
+}
+
+.btn-primary:hover {
+  box-shadow: var(--glow-blue);
+  transform: translateY(-1px);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--neon-blue);
+  border: 1px solid rgba(0,200,255,0.3);
+}
+
+.btn-outline:hover {
+  background: rgba(0,200,255,0.08);
+  border-color: var(--neon-blue);
+}
+
+.btn-red {
+  background: transparent;
+  color: var(--neon-red);
+  border: 1px solid rgba(255,45,85,0.3);
+}
+
+.btn-red:hover { background: rgba(255,45,85,0.1); }
+
+.btn-green {
+  background: transparent;
+  color: var(--neon-green);
+  border: 1px solid rgba(0,255,157,0.3);
+}
+
+.btn-green:hover { background: rgba(0,255,157,0.1); }
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.data-table th {
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.data-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.data-table tr:hover td {
+  background: rgba(0,200,255,0.03);
+  color: var(--text-primary);
+}
+
+.data-table tr.high-risk td {
+  background: rgba(255,45,85,0.04);
+}
+
+.data-table tr.high-risk:hover td {
+  background: rgba(255,45,85,0.08);
+}
+
+.data-table tr.high-risk .tx-id {
+  color: var(--neon-red);
+  text-shadow: 0 0 8px rgba(255,45,85,0.4);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/* ===== BADGES / TAGS ===== */
+.badge {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge-red { background: rgba(255,45,85,0.15); color: var(--neon-red); border: 1px solid rgba(255,45,85,0.3); }
+.badge-orange { background: rgba(255,107,43,0.15); color: var(--neon-orange); border: 1px solid rgba(255,107,43,0.3); }
+.badge-yellow { background: rgba(255,214,10,0.15); color: var(--neon-yellow); border: 1px solid rgba(255,214,10,0.3); }
+.badge-green { background: rgba(0,255,157,0.1); color: var(--neon-green); border: 1px solid rgba(0,255,157,0.25); }
+.badge-blue { background: rgba(0,200,255,0.1); color: var(--neon-blue); border: 1px solid rgba(0,200,255,0.25); }
+.badge-gray { background: rgba(255,255,255,0.06); color: var(--text-secondary); border: 1px solid rgba(255,255,255,0.1); }
+.badge-purple { background: rgba(191,90,242,0.12); color: var(--neon-purple); border: 1px solid rgba(191,90,242,0.3); }
+
+
+
+
+
+
+
+
+
+
+/* ===== FRAUD SCORE BAR ===== */
+.fraud-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fraud-bar-track {
+  flex: 1;
+  height: 5px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.fraud-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.fraud-bar-value {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  min-width: 32px;
+  text-align: right;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ===== PAGINATION ===== */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0 0;
+  border-top: 1px solid var(--border);
+  margin-top: 4px;
+}
+
+.pagination-info { font-size: 10px; color: var(--text-dim); }
+
+.pagination-btns {
+  display: flex;
+  gap: 4px;
+}
+
+.page-btn {
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.page-btn:hover, .page-btn.active {
+  border-color: var(--neon-blue);
+  color: var(--neon-blue);
+  background: rgba(0,200,255,0.08);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ===== SECTION HEADERS ===== */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.section-title span {
+  color: var(--neon-blue);
+}
+
+.section-meta {
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-top: 2px;
+  letter-spacing: 1px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ===== NOTIFICATION POPUP ===== */
+#notification-popup {
+  position: fixed;
+  top: 80px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.notif-item {
+  background: rgba(8, 12, 28, 0.97);
+  border: 1px solid rgba(255,45,85,0.4);
+  border-radius: 10px;
+  padding: 12px 16px;
+  width: 280px;
+  box-shadow: var(--glow-red);
+  pointer-events: all;
+  animation: slideIn 0.3s ease;
+  backdrop-filter: blur(20px);
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.notif-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--neon-red);
+  margin-bottom: 4px;
+  font-family: var(--font-display);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.notif-body { font-size: 10px; color: var(--text-secondary); line-height: 1.5; }
+.notif-time { font-size: 9px; color: var(--text-dim); margin-top: 6px; }
+
+
+
+
+
+
+
+
+
+
+
+/* ===== TIMELINE ===== */
+.timeline {
+  position: relative;
+  padding-left: 24px;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 7px; top: 0; bottom: 0;
+  width: 1px;
+  background: linear-gradient(to bottom, var(--neon-blue), transparent);
+}
+
+.timeline-item {
+  position: relative;
+  padding: 8px 0 16px;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: -21px;
+  top: 11px;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  border: 2px solid;
+  background: var(--bg-primary);
+}
+
+.timeline-dot.red { border-color: var(--neon-red); box-shadow: 0 0 8px rgba(255,45,85,0.5); }
+.timeline-dot.blue { border-color: var(--neon-blue); box-shadow: 0 0 8px rgba(0,200,255,0.5); }
+.timeline-dot.green { border-color: var(--neon-green); box-shadow: 0 0 8px rgba(0,255,157,0.5); }
+.timeline-dot.yellow { border-color: var(--neon-yellow); box-shadow: 0 0 8px rgba(255,214,10,0.5); }
+.timeline-dot.orange { border-color: var(--neon-orange); }
+
+.timeline-time { font-size: 9px; color: var(--text-dim); margin-bottom: 2px; }
+.timeline-event { font-size: 11px; color: var(--text-primary); }
+.timeline-desc { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ===== HEATMAP ===== */
+.heatmap-grid {
+  display: grid;
+  grid-template-columns: repeat(24, 1fr);
+  gap: 3px;
+}
+
+.heat-cell {
+  height: 28px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: transform 0.15s;
+  position: relative;
+}
+
+.heat-cell:hover { transform: scaleY(1.2); }
+.heat-cell[title] { cursor: crosshair; }
+
+.heatmap-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+.heat-label { font-size: 8px; color: var(--text-dim); }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ===== ANALYST CARDS ===== */
+.analyst-perf-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  transition: all 0.2s;
+}
+
+.analyst-perf-card:hover {
+  background: rgba(0,200,255,0.04);
+  border-color: var(--border-bright);
+}
+
+.analyst-rank {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-dim);
+  min-width: 28px;
+}
+
+.analyst-rank.top { color: var(--neon-yellow); }
+
+.analyst-perf-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.analyst-perf-info { flex: 1; min-width: 0; }
+.analyst-perf-name { font-size: 12px; color: var(--text-primary); font-weight: 600; }
+.analyst-perf-stat { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
+
+.analyst-score {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--neon-green);
+}
+
+
+
+
+
+
+
+
+/* ===== ACTION BUTTONS IN TABLE ===== */
+.action-btns {
+  display: flex;
+  gap: 4px;
+}
+
+.action-btn {
+  padding: 3px 7px;
+  border-radius: 4px;
+  font-size: 9px;
+  cursor: pointer;
+  border: none;
+  font-family: var(--font-mono);
+  transition: all 0.15s;
+}
+
+.action-btn.assign { background: rgba(0,200,255,0.15); color: var(--neon-blue); }
+.action-btn.escalate { background: rgba(255,107,43,0.15); color: var(--neon-orange); }
+.action-btn.resolve { background: rgba(0,255,157,0.15); color: var(--neon-green); }
+.action-btn.block { background: rgba(255,45,85,0.15); color: var(--neon-red); }
+
+.action-btn:hover { opacity: 0.8; transform: scale(1.05); }
+
+
+
+
+
+
+
+/* ===== CUSTOMER INVESTIGATION ===== */
+.cust-summary {
+  display: grid;
+  grid-template-columns: auto 1fr 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.cust-avatar-lg {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 800;
+  border: 2px solid var(--neon-blue);
+  box-shadow: 0 0 24px rgba(0,200,255,0.2);
+}
+
+.cust-detail-item { margin-bottom: 8px; }
+.cust-detail-label { font-size: 9px; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase; }
+.cust-detail-value { font-size: 12px; color: var(--text-primary); margin-top: 2px; }
+
+
+
+
+
+
+
+
+
+
+
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1200px) {
+  .charts-grid { grid-template-columns: 1fr; }
+  .charts-grid-3 { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 900px) {
+  :root { --sidebar-width: 0px; }
+  #sidebar { transform: translateX(-240px); }
+  #topbar { left: 0; }
+  .charts-grid-3 { grid-template-columns: 1fr; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-secondary); }
+::-webkit-scrollbar-thumb { background: rgba(0,200,255,0.2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0,200,255,0.4); }
+
+
+
+
+
+
+
+
+/* ===== SEARCH PAGE ===== */
+.search-input-lg {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 20px;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: 16px;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.search-input-lg:focus {
+  border-color: var(--neon-blue);
+  background: rgba(0,200,255,0.04);
+  box-shadow: 0 0 0 3px rgba(0,200,255,0.08);
+}
+
+
+
+
+
+
+
+/* ===== ADMIN CARDS ===== */
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.rule-card {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.rule-toggle {
+  width: 36px; height: 20px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s;
+  flex-shrink: 0;
+}
+
+.rule-toggle.on { background: var(--neon-green); box-shadow: 0 0 10px rgba(0,255,157,0.4); }
+.rule-toggle.off { background: rgba(255,255,255,0.15); }
+
+.rule-toggle::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: white;
+  transition: all 0.3s;
+}
+
+.rule-toggle.on::after { left: 19px; }
+.rule-toggle.off::after { left: 3px; }
+
+.col-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.col-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+.mb16 { margin-bottom: 16px; }
+.mt16 { margin-top: 16px; }
+.p20 { padding: 20px; }
+
+/* Glowing row */
+@keyframes rowGlow {
+  0%,100% { box-shadow: none; }
+  50% { box-shadow: inset 0 0 30px rgba(255,45,85,0.08); }
+}
+.glow-row { animation: rowGlow 3s infinite; }
+
+/* Counter animation */
+.counter { transition: all 0.3s; }
+
+/* Loading spinner */
+.spinner {
+  width: 20px; height: 20px;
+  border: 2px solid var(--border);
+  border-top-color: var(--neon-blue);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+
+
+
+
+
+
+
+/* ===== AUTH SCREEN ===== */
+#loginScreen{
+ position:fixed;
+ inset:0;
+ background:var(--bg-primary);
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ z-index:99999;
+ padding:20px;
+}
+
+#loginScreen::before {
+ content:'';
+ position:absolute;
+ inset:0;
+ background:
+   radial-gradient(ellipse 60% 50% at 30% 30%, rgba(0,200,255,0.07) 0%, transparent 60%),
+   radial-gradient(ellipse 50% 40% at 70% 70%, rgba(191,90,242,0.05) 0%, transparent 60%);
+ pointer-events:none;
+}
+
+.login-box{
+ width:100%;
+ max-width:440px;
+ background:var(--bg-card);
+ border:1px solid var(--border-bright);
+ border-radius:20px;
+ padding:40px;
+ backdrop-filter:blur(30px);
+ box-shadow:0 24px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,200,255,0.08);
+ position:relative;
+ z-index:1;
+}
+
+.login-logo{
+ display:flex;
+ align-items:center;
+ gap:14px;
+ margin-bottom:30px;
+}
+
+.login-title{
+ font-family:var(--font-display);
+ font-size:28px;
+ font-weight:800;
+ margin-bottom:6px;
+ background: linear-gradient(135deg, var(--text-primary), var(--neon-blue));
+ -webkit-background-clip: text;
+ -webkit-text-fill-color: transparent;
+ background-clip: text;
+}
+
+.input-group {
+ margin-bottom:16px;
+}
+
+.input-label {
+ display:block;
+ font-size:10px;
+ letter-spacing:1.5px;
+ color:var(--text-secondary);
+ margin-bottom:6px;
+ text-transform:uppercase;
+}
+
+.input-label i { margin-right:5px; color:var(--neon-blue); }
+
+.login-box input{
+ width:100%;
+ padding:13px 16px;
+ background:rgba(255,255,255,0.04);
+ border:1px solid var(--border);
+ border-radius:10px;
+ color:var(--text-primary);
+ font-family:var(--font-mono);
+ font-size:12px;
+ outline:none;
+ transition:all 0.2s;
+}
+
+.login-box input:focus {
+ border-color:var(--neon-blue);
+ background:rgba(0,200,255,0.06);
+ box-shadow:0 0 0 3px rgba(0,200,255,0.1);
+}
+
+.login-box input::placeholder { color:var(--text-dim); }
+
+.auth-btn {
+ width:100%;
+ padding:14px;
+ border:none;
+ border-radius:12px;
+ background:linear-gradient(135deg, var(--neon-blue), #0099cc);
+ color:#000;
+ font-weight:800;
+ font-family:var(--font-display);
+ font-size:14px;
+ cursor:pointer;
+ letter-spacing:0.5px;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ gap:8px;
+ transition:all 0.2s;
+ box-shadow:0 4px 20px rgba(0,200,255,0.35);
+}
+
+.auth-btn:hover {
+ transform:translateY(-2px);
+ box-shadow:0 8px 30px rgba(0,200,255,0.5);
+}
+
+.auth-btn:active { transform:translateY(0); }
+
+.auth-error {
+ color:var(--neon-red);
+ font-size:11px;
+ margin-top:12px;
+ display:none;
+ padding:10px 14px;
+ background:rgba(255,45,85,0.08);
+ border:1px solid rgba(255,45,85,0.25);
+ border-radius:8px;
+ align-items:center;
+ gap:6px;
+}
+
+.auth-divider {
+ display:flex;
+ align-items:center;
+ gap:12px;
+ margin:20px 0;
+ color:var(--text-dim);
+ font-size:10px;
+}
+.auth-divider::before,.auth-divider::after {
+ content:'';
+ flex:1;
+ height:1px;
+ background:var(--border);
+}
+
+#loginError{
+ color:var(--neon-red);
+ font-size:11px;
+ margin-top:12px;
+ display:none;
+ padding:10px 14px;
+ background:rgba(255,45,85,0.08);
+ border:1px solid rgba(255,45,85,0.25);
+ border-radius:8px;
+}
+
+
+/* ===== SWITCHING ===== */
+
+
+.switch-link{
+ margin-top:14px;
+ text-align:center;
+ font-size:11px;
+ color:var(--text-secondary);
+}
+
+.switch-link span{
+ color:var(--neon-blue);
+ cursor:pointer;
+ font-weight:700;
+}
+
+#signupError{
+ color:var(--neon-red);
+ font-size:11px;
+ margin-top:12px;
+ display:none;
+}
+
+
+
+</style>
+</head>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ======================== */
+
+/* ======= HTML CODE======= */
+
+/* ======================= */
+
+
+
+
+
+<body>
+
+<div id="loginScreen">
+
+  <!-- LOGIN BOX -->
+  <div class="login-box" id="loginBox">
+    <div class="login-logo">
+      <div class="logo-icon"><i class="fas fa-user-shield"></i></div>
+      <div>
+        <div class="logo-text">FraudShield</div>
+        <div class="logo-sub">PORTAL</div>
+      </div>
+    </div>
+
+
+
+
+    <div class="login-title">Welcome Back</div>
+    <div style="font-size:11px;color:var(--text-secondary);margin-bottom:24px;margin-top:-12px">Login In</div>
+
+
+
+    <div class="input-group">
+      <label class="input-label"><i class="fas fa-envelope"></i> Email Address</label>
+      <input type="email" id="loginEmail" placeholder="analyst@fraudshield.com" autocomplete="email">
+    </div>
+
+
+
+    <div class="input-group">
+      <label class="input-label"><i class="fas fa-lock"></i> Password</label>
+      <input type="password" id="loginPassword" placeholder="Enter your password" autocomplete="current-password">
+    </div>
+
+
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;font-size:11px">
+      <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--text-secondary)">
+        <input type="checkbox" style="accent-color:var(--neon-blue)"> Remember me
+      </label>
+      <span style="color:var(--neon-blue);cursor:pointer">Forgot password?</span>
+    </div>
+
+
+
+
+    <button class="auth-btn" onclick="loginUser()">
+      <i class="fas fa-sign-in-alt"></i> LOGIN
+    </button>
+
+    <div id="loginError" class="auth-error">
+      <i class="fas fa-exclamation-circle"></i> Invalid email or password
+    </div>
+
+
+
+    <div class="auth-divider"><span>OR</span></div>
+
+    <div class="switch-link">
+      Don&apos;t have an account?
+      <span onclick="showSignup()">Create Account</span>
+    </div>
+  </div>
+
+
+
+
+  <!-- SIGNUP BOX -->
+  <div class="login-box" id="signupBox" style="display:none;">
+    <div class="login-logo">
+      <div class="logo-icon"><i class="fas fa-user-plus"></i></div>
+      <div>
+        <div class="logo-text">FraudShield</div>
+        <div class="logo-sub">CREATE ACCOUNT</div>
+      </div>
+    </div>
+
+    <div class="login-title">Create Account</div>
+    <div style="font-size:11px;color:var(--text-secondary);margin-bottom:24px;margin-top:-12px">Register as a fraud analyst</div>
+
+    <div class="input-group">
+      <label class="input-label"><i class="fas fa-user"></i> Full Name</label>
+      <input type="text" id="signupName" placeholder="e.g. Ali Hassan" autocomplete="name">
+    </div>
+
+    <div class="input-group">
+      <label class="input-label"><i class="fas fa-envelope"></i> Email Address</label>
+      <input type="email" id="signupEmail" placeholder="you@example.com" autocomplete="email">
+    </div>
+
+    <div class="input-group">
+      <label class="input-label"><i class="fas fa-lock"></i> Password</label>
+      <input type="password" id="signupPass" placeholder="Min. 6 characters" autocomplete="new-password">
+    </div>
+
+    <div class="input-group" style="margin-bottom:20px">
+      <label class="input-label"><i class="fas fa-lock"></i> Confirm Password</label>
+      <input type="password" id="signupPass2" placeholder="Repeat password" autocomplete="new-password">
+    </div>
+
+    <button class="auth-btn" onclick="signupUser()">
+      <i class="fas fa-user-check"></i> Create Account
+    </button>
+
+    <div id="signupError" class="auth-error">
+      <i class="fas fa-exclamation-circle"></i> <span id="signupErrorText">Please check your details</span>
+    </div>
+
+    <div class="auth-divider"><span>OR</span></div>
+
+    <div class="switch-link">
+      Already have an account?
+      <span onclick="showLogin()">LogIn</span>
+    </div>
+  </div>
+
+</div>
+
+
+
+
+
+
+
+
+<!-- 
+this is html code for sidebar
+-->
+
+
+<!-- NOTIFICATION POPUP -->
+<div id="notification-popup"></div>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="sidebar-logo">
+   <div class="logo-icon">
+   <i class="fas fa-user-shield"></i>
+</div>
+    <div>
+      <div class="logo-text">FraudShield</div>
+      <div class="logo-sub">FINTECH 24 </div>
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="section-label">OVERVIEW</div>
+    <div class="nav-item active" onclick="showPage('dashboard')">
+      <i class="fas fa-gauge-high"></i> Dashboard
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="section-label">MONITORING</div>
+    <div class="nav-item" onclick="showPage('transactions')">
+      <i class="fas fa-exchange-alt"></i> Transactions
+      <span class="nav-badge blue">10K</span>
+    </div>
+    <div class="nav-item" onclick="showPage('alerts')">
+      <i class="fas fa-bell"></i> Alerts 
+      <span class="nav-badge">47</span>
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="section-label">INVESTIGATION</div>
+    <div class="nav-item" onclick="showPage('investigation')">
+      <i class="fas fa-user-secret"></i> Customer Lookup
+    </div>
+    <div class="nav-item" onclick="showPage('cases')">
+      <i class="fas fa-folder-open"></i> Case Management
+      <span class="nav-badge">12</span>
+    </div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="section-label">TEAM</div>
+    <div class="nav-item" onclick="showPage('analyst')">
+      <i class="fas fa-users"></i> Analyst Portal
+    </div>
+    <div class="nav-item" onclick="showPage('admin')">
+      <i class="fas fa-cog"></i> Admin Panel
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="analyst-card">
+      <div class="analyst-avatar">SA</div>
+      <div>
+        <div class="analyst-name"> Analyst</div>
+        <div class="analyst-role">Senior Analyst · Online</div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- 
+this is html code upper navigation bar
+-->
+
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <div class="topbar-title" id="topbar-title">Overview</div>
+  <div class="topbar-search">
+    <i class="fas fa-search"></i>
+    <input type="text" placeholder="Search transactions, cases, customers...">
+  </div>
+  <div class="status-live">
+    <div class="pulse-dot"></div>
+    LIVE
+  </div>
+  <div class="topbar-btn" onclick="showPage('alerts')">
+    <i class="fas fa-bell"></i>
+    <div class="notif-dot"></div>
+  </div>
+ <div class="topbar-btn" onclick="toggleTheme()" id="themeBtn">
+  <i class="fas fa-moon"></i>
+</div>
+  <div class="topbar-btn" onclick="toggleProfileMenu()">
+    <i class="fas fa-user"></i>
+    <div id="profile-menu" style="display:none;position:absolute;top:46px;right:16px;width:230px;background:var(--bg-card);border:1px solid var(--border-bright);border-radius:8px;padding:10px;box-shadow:var(--glow-blue);z-index:2000">
+      <div id="profile-name" style="font-size:12px;color:var(--text-primary);font-weight:700">Not signed in</div>
+      <div id="profile-role" style="font-size:10px;color:var(--text-secondary);margin:3px 0 10px">Guest</div>
+      <button class="btn btn-outline" onclick="showLoginScreen()" style="width:100%;justify-content:center;margin-bottom:6px"><i class="fas fa-sign-in-alt"></i> Login / Signup</button>
+      <button class="btn btn-red" onclick="logoutUser()" style="width:100%;justify-content:center"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- MAIN CONTENT -->
+<div id="main">
+
+<!-- ============================= PAGE 1: DASHBOARD ============================= -->
+<div id="page-dashboard" class="page active">
+  <div class="section-header">
+
+    <div>
+      <div class="section-title">Executive <span>Overview</span></div>
+      <div class="section-meta">REAL-TIME <span id="last-update">JUST NOW</span></div>
+    </div>
+
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-outline"><i class="fas fa-download"></i> Export Report</button>
+      <button class="btn btn-primary"><i class="fas fa-sync"></i> Refresh</button>
+    </div>
+  </div>
+
+
+  <!-- KPI CARDS -->
+  <div class="kpi-grid">
+    <div class="glass-card kpi-card red">
+      <div class="kpi-icon"><i class="fas fa-percent"></i></div>
+      <div class="kpi-value" style="color:var(--neon-red)"><span class="counter" id="kpi-fraud-rate">2.34</span>%</div>
+      <div class="kpi-label">Fraud Rate</div>
+      <div class="kpi-trend trend-up"><i class="fas fa-arrow-up"></i> +0.12% vs last month</div>
+    </div>
+    <div class="glass-card kpi-card orange">
+      <div class="kpi-icon"><i class="fas fa-exclamation-triangle"></i></div>
+      <div class="kpi-value" style="color:var(--neon-orange)"><span class="counter" id="kpi-open-alerts">487</span></div>
+      <div class="kpi-label">Open Alerts</div>
+      <div class="kpi-trend trend-up"><i class="fas fa-arrow-up"></i> +23 since yesterday</div>
+    </div>
+    <div class="glass-card kpi-card blue">
+      <div class="kpi-icon"><i class="fas fa-dollar-sign"></i></div>
+      <div class="kpi-value" style="color:var(--neon-blue)">$<span class="counter" id="kpi-volume">42.7M</span></div>
+      <div class="kpi-label">Transaction Volume</div>
+      <div class="kpi-trend trend-down"><i class="fas fa-arrow-up"></i> +$1.2M today</div>
+    </div>
+    <div class="glass-card kpi-card red">
+      <div class="kpi-icon"><i class="fas fa-money-bill-wave"></i></div>
+      <div class="kpi-value" style="color:var(--neon-red)">$<span class="counter" id="kpi-losses">1.38M</span></div>
+      <div class="kpi-label">Fraud Losses</div>
+      <div class="kpi-trend trend-up"><i class="fas fa-arrow-up"></i> +$82K this week</div>
+    </div>
+    <div class="glass-card kpi-card green">
+      <div class="kpi-icon"><i class="fas fa-shield-alt"></i></div>
+      <div class="kpi-value" style="color:var(--neon-green)"><span class="counter" id="kpi-block-rate">78.4</span>%</div>
+      <div class="kpi-label">Fraud Block Rate</div>
+      <div class="kpi-trend trend-down"><i class="fas fa-arrow-up"></i> +2.1% improvement</div>
+    </div>
+    <div class="glass-card kpi-card red">
+      <div class="kpi-icon"><i class="fas fa-bug"></i></div>
+      <div class="kpi-value" style="color:var(--neon-red)"><span class="counter" id="kpi-confirmed">312</span></div>
+      <div class="kpi-label">Confirmed Fraud</div>
+      <div class="kpi-trend trend-up"><i class="fas fa-arrow-up"></i> +18 this week</div>
+    </div>
+    <div class="glass-card kpi-card yellow">
+      <div class="kpi-icon"><i class="fas fa-search"></i></div>
+      <div class="kpi-value" style="color:var(--neon-yellow)"><span class="counter" id="kpi-pending">156</span></div>
+      <div class="kpi-label">Pending Investigations</div>
+      <div class="kpi-trend trend-neutral"><i class="fas fa-minus"></i> No change</div>
+    </div>
+    <div class="glass-card kpi-card green">
+      <div class="kpi-icon"><i class="fas fa-hand-holding-usd"></i></div>
+      <div class="kpi-value" style="color:var(--neon-green)">$<span class="counter" id="kpi-recovery">687K</span></div>
+      <div class="kpi-label">Total Recoveries</div>
+      <div class="kpi-trend trend-down"><i class="fas fa-arrow-up"></i> +$34K recovered</div>
+    </div>
+  </div>
+
+
+  <!-- CHARTS ROW 1 -->
+  <div class="charts-grid mb16">
+    <div class="glass-card chart-card">
+      <div class="chart-title">Fraud by Type · This Month</div>
+      <div class="chart-subtitle">Distribution across all fraud categories</div>
+      <div class="chart-container">
+        <canvas id="chart-fraud-type"></canvas>
+      </div>
+    </div>
+    <div class="glass-card chart-card">
+      <div class="chart-title">Daily Fraud Trend</div>
+      <div class="chart-subtitle">Transaction count with fraud events overlay</div>
+      <div class="chart-container">
+        <canvas id="chart-daily-trend"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHARTS ROW 2 -->
+  <div class="charts-grid mb16">
+    <div class="glass-card chart-card">
+      <div class="chart-title">Fraud Losses vs Recoveries</div>
+      <div class="chart-subtitle">Monthly comparison â€” last 8 months</div>
+      <div class="chart-container">
+        <canvas id="chart-loss-recovery"></canvas>
+      </div>
+    </div>
+    <div class="glass-card chart-card">
+      <div class="chart-title">Fraud by Channel</div>
+      <div class="chart-subtitle">Method-based breakdown</div>
+      <div class="chart-container">
+        <canvas id="chart-by-channel"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- HIGH RISK TRANSACTIONS TABLE -->
+  <div class="glass-card table-card">
+    <div class="table-header">
+      <div>
+        <div class="chart-title">Recent High-Risk Transactions</div>
+        <div class="chart-subtitle">Fraud score â‰¥ 75% Â· Auto-refreshing</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-outline"><i class="fas fa-file-csv"></i> CSV</button>
+        <button class="btn btn-primary" onclick="showPage('transactions')"><i class="fas fa-expand"></i> Full View</button>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+    <table class="data-table" id="dash-tx-table">
+      <thead>
+        <tr>
+          <th>Transaction ID</th><th>Customer</th><th>Method</th>
+          <th>Amount</th><th>Fraud Score</th><th>Time</th><th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="dash-tx-body"></tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- ============================= PAGE 2: TRANSACTIONS ============================= -->
+<div id="page-transactions" class="page">
+  <div class="section-header">
+    <div>
+      <div class="section-title">Transaction <span>Monitoring</span></div>
+      <div class="section-meta">10,000+ RECORDS · SEARCHABLE</div>
+    </div>
+   <div style="display:flex;gap:8px;flex-wrap:wrap">
+  
+  <button class="btn btn-outline" onclick="downloadCSV()">
+    <i class="fas fa-file-csv"></i> CSV
+  </button>
+
+  <button class="btn btn-outline" onclick="downloadExcel()">
+    <i class="fas fa-file-excel"></i> Excel
+  </button>
+
+  <button class="btn btn-outline" onclick="downloadPDF()">
+    <i class="fas fa-file-pdf"></i> PDF
+  </button>
+
+</div>
+  </div>
+
+  <div class="glass-card p20 mb16">
+    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+      <input type="text" class="filter-input" placeholder="Search by Transaction ID..." id="tx-search-id" oninput="filterTx()" style="min-width:160px">
+      <input type="text" class="filter-input" placeholder="Customer Name..." id="tx-search-name" oninput="filterTx()" style="min-width:150px">
+      <select class="filter-input" id="tx-filter-method" onchange="filterTx()">
+        <option value="">All Methods</option>
+        <option>P2P</option><option>ATM</option><option>Mobile</option>
+        <option>Wire</option><option>InStore</option><option>Online</option>
+        <option>POS</option><option>Transfer</option>
+      </select>
+      <select class="filter-input" id="tx-filter-risk" onchange="filterTx()">
+        <option value="">All Risk Levels</option>
+        <option>Critical</option><option>High</option>
+        <option>Medium</option><option>Low</option>
+      </select>
+      <select class="filter-input" id="tx-filter-status" onchange="filterTx()">
+        <option value="">All Status</option>
+        <option>Blocked</option><option>Flagged</option>
+        <option>Under Review</option><option>Cleared</option>
+      </select>
+      <input type="number" class="filter-input" placeholder="Min Score %" id="tx-filter-minscore" oninput="filterTx()" style="width:100px">
+    </div>
+  </div>
+
+  <div class="glass-card table-card">
+    <div style="overflow-x:auto">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>TX ID</th><th>Date & Time</th><th>Customer</th><th>Account</th>
+          <th>Method</th><th>Merchant</th><th>Location</th><th>Device</th>
+          <th>Amount</th><th>Fraud Score</th><th>Risk</th><th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="tx-table-body"></tbody>
+    </table>
+    </div>
+    <div class="pagination">
+      <div class="pagination-info" id="tx-pagination-info">Showing 1-25 of 10000</div>
+      <div class="pagination-btns" id="tx-pagination-btns"></div>
+    </div>
+  </div>
+</div>
+
+
+
+
+<!-- ============================= PAGE 3: ALERTS ============================= -->
+<div id="page-alerts" class="page">
+  <div class="section-header">
+    <div>
+      <div class="section-title">Alerts <span>& Queues</span></div>
+      <div class="section-meta">REAL-TIME · AUTO-ASSIGN </div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-outline"><i class="fas fa-filter"></i> Bulk Action</button>
+      <button class="btn btn-primary"><i class="fas fa-plus"></i> Create Alert</button>
+    </div>
+  </div>
+
+  <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+    <div class="glass-card kpi-card orange">
+      <div class="kpi-icon"><i class="fas fa-bell"></i></div>
+      <div class="kpi-value" style="color:var(--neon-orange)"><span id="alert-open-count">487</span></div>
+      <div class="kpi-label">Open Alerts</div>
+    </div>
+    <div class="glass-card kpi-card red">
+      <div class="kpi-icon"><i class="fas fa-radiation"></i></div>
+      <div class="kpi-value" style="color:var(--neon-red)">63</div>
+      <div class="kpi-label">Critical Alerts</div>
+    </div>
+    <div class="glass-card kpi-card blue">
+      <div class="kpi-icon"><i class="fas fa-stopwatch"></i></div>
+      <div class="kpi-value" style="color:var(--neon-blue)">8.4m</div>
+      <div class="kpi-label">Avg Response</div>
+    </div>
+    <div class="glass-card kpi-card orange">
+      <div class="kpi-icon"><i class="fas fa-level-up-alt"></i></div>
+      <div class="kpi-value" style="color:var(--neon-orange)">29</div>
+      <div class="kpi-label">Escalated Today</div>
+    </div>
+  </div>
+
+  <!-- Filter Pills -->
+  <div class="glass-card p20 mb16">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <span style="font-size:10px;color:var(--text-dim);margin-right:4px">FILTER:</span>
+      <button class="btn btn-red alert-filter active" data-filter="">All</button>
+      <button class="btn alert-filter" data-filter="Critical" style="color:var(--neon-red);border:1px solid rgba(255,45,85,0.3)">Critical</button>
+      <button class="btn alert-filter" data-filter="High" style="color:var(--neon-orange);border:1px solid rgba(255,107,43,0.3)">High</button>
+      <button class="btn alert-filter" data-filter="Medium" style="color:var(--neon-yellow);border:1px solid rgba(255,214,10,0.3)">Medium</button>
+      <button class="btn alert-filter" data-filter="Open" style="color:var(--neon-blue);border:1px solid rgba(0,200,255,0.3)">Open</button>
+      <button class="btn alert-filter" data-filter="Escalated" style="color:var(--neon-purple);border:1px solid rgba(191,90,242,0.3)">Escalated</button>
+      <button class="btn alert-filter" data-filter="New" style="color:var(--neon-green);border:1px solid rgba(0,255,157,0.3)">New</button>
+      <button class="btn alert-filter" data-filter="Resolved" style="color:var(--text-secondary);border:1px solid var(--border)">Resolved</button>
+    </div>
+  </div>
+
+  <div class="glass-card table-card">
+    <div style="overflow-x:auto">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Alert ID</th><th>Generated</th><th>TX ID</th><th>Customer</th>
+          <th>Alert Type</th><th>Severity</th><th>Score</th>
+          <th>Analyst</th><th>Queue Status</th><th>Open Time</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="alerts-table-body"></tbody>
+    </table>
+    </div>
+    <div class="pagination">
+      <div class="pagination-info" id="alerts-pagination-info">Showing 1-25 of 500</div>
+      <div class="pagination-btns" id="alerts-pagination-btns"></div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+<!-- ============================= PAGE 4: CUSTOMER INVESTIGATION LOOKUP ============================= -->
+<div id="page-investigation" class="page">
+  <div class="section-header">
+    <div>
+      <div class="section-title">Customer <span>Investigation</span></div>
+      <div class="section-meta">ID-BASED DEEP DIVE · FORENSIC TIMELINE · PATTERN ANALYSIS</div>
+    </div>
+  </div>
+
+  <div class="glass-card p20 mb16">
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+      <input type="text" class="search-input-lg" id="cust-search-input" placeholder="Enter Customer ID (e.g. CUST-0042) or Name..." style="max-width:460px;font-size:13px;padding:10px 16px">
+      <button class="btn btn-primary" onclick="searchCustomer()" style="padding:10px 20px">
+        <i class="fas fa-search"></i> Investigate
+      </button>
+      <button class="btn btn-outline" onclick="searchCustomer('random')" style="padding:10px 16px">
+        <i class="fas fa-random"></i> Random
+      </button>
+    </div>
+  </div>
+
+  <div id="cust-results" style="display:none">
+    <!-- Customer Summary -->
+    <div class="glass-card mb16 cust-summary" id="cust-summary-card">
+    </div>
+
+    <div class="col-2 mb16">
+      <!-- Timeline -->
+      <div class="glass-card p20">
+        <div class="chart-title mb16">Fraud Event Timeline</div>
+        <div class="timeline" id="cust-timeline"></div>
+      </div>
+      <!-- Risk Trend -->
+      <div class="glass-card chart-card">
+        <div class="chart-title">Risk Score Trend</div>
+        <div class="chart-subtitle">30-day fraud probability evolution</div>
+        <div class="chart-container">
+          <canvas id="chart-risk-trend"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="glass-card p20 mb16">
+      <div class="chart-title mb16">24-Hour Attack Pattern Heatmap</div>
+      <div class="heatmap-grid" id="heatmap-grid"></div>
+      <div class="heatmap-labels">
+        <span class="heat-label">00:00</span>
+        <span class="heat-label">06:00</span>
+        <span class="heat-label">12:00</span>
+        <span class="heat-label">18:00</span>
+        <span class="heat-label">23:00</span>
+      </div>
+    </div>
+
+    <!-- Transaction History -->
+    <div class="glass-card table-card">
+      <div class="chart-title mb16">Full Transaction History</div>
+      <div style="overflow-x:auto">
+      <table class="data-table">
+        <thead>
+          <tr><th>Time</th><th>TX ID</th><th>Method</th><th>Merchant</th><th>Amount</th><th>Fraud Score</th><th>Status</th></tr>
+        </thead>
+        <tbody id="cust-tx-body"></tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+<!-- ============================= PAGE 5: CASE Mangement ============================= -->
+<div id="page-cases" class="page">
+  <div class="section-header">
+    <div>
+      <div class="section-title">Case <span>Management</span></div>
+      <div class="section-meta">INVESTIGATION OF WORKFLOW · ANALYTICS</div>
+    </div>
+    <button class="btn btn-primary"><i class="fas fa-plus"></i> New Case</button>
+  </div>
+
+  <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+    <div class="glass-card kpi-card orange">
+      <div class="kpi-icon"><i class="fas fa-folder-open"></i></div>
+      <div class="kpi-value" style="color:var(--neon-orange)">156</div>
+      <div class="kpi-label">Open Cases</div>
+    </div>
+    <div class="glass-card kpi-card green">
+      <div class="kpi-icon"><i class="fas fa-check-circle"></i></div>
+      <div class="kpi-value" style="color:var(--neon-green)">23</div>
+      <div class="kpi-label">Closed Today</div>
+    </div>
+    <div class="glass-card kpi-card blue">
+      <div class="kpi-icon"><i class="fas fa-clock"></i></div>
+      <div class="kpi-value" style="color:var(--neon-blue)">4.2h</div>
+      <div class="kpi-label">Avg Resolution</div>
+    </div>
+    <div class="glass-card kpi-card green">
+      <div class="kpi-icon"><i class="fas fa-hand-holding-usd"></i></div>
+      <div class="kpi-value" style="color:var(--neon-green)">$687K</div>
+      <div class="kpi-label">Total Recovered</div>
+    </div>
+  </div>
+
+  <div class="charts-grid mb16">
+    <div class="glass-card chart-card">
+      <div class="chart-title">Cases Resolution â€” Weekly</div>
+      <div class="chart-subtitle">Resolved vs opened cases by week</div>
+      <div class="chart-container">
+        <canvas id="chart-cases-weekly"></canvas>
+      </div>
+    </div>
+    <div class="glass-card chart-card">
+      <div class="chart-title">Recovery Rate %</div>
+      <div class="chart-subtitle">Percentage recovered vs total fraud amount</div>
+      <div class="chart-container">
+        <canvas id="chart-recovery-rate"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Analyst Performance -->
+  <div class="col-2 mb16">
+    <div class="glass-card p20">
+      <div class="chart-title" style="margin-bottom:16px">Analyst Performance Ranking</div>
+      <div id="analyst-ranking"></div>
+    </div>
+    <div class="glass-card chart-card">
+      <div class="chart-title">Monthly Cases Trend</div>
+      <div class="chart-subtitle">Year-to-date case flow</div>
+      <div class="chart-container">
+        <canvas id="chart-cases-monthly"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="glass-card table-card">
+    <div class="table-header">
+      <div>
+        <div class="chart-title">All Cases</div>
+        <div class="chart-subtitle">300 cases Â· filtered view</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <select class="filter-input" id="case-filter-status" onchange="filterCases()">
+          <option value="">All Status</option>
+          <option>Open</option><option>Under Review</option>
+          <option>Pending Docs</option><option>Closed</option>
+        </select>
+        <select class="filter-input" id="case-filter-priority" onchange="filterCases()">
+          <option value="">All Priority</option>
+          <option>Critical</option><option>High</option>
+          <option>Medium</option><option>Low</option>
+        </select>
+        <input type="text" class="filter-input" placeholder="Case ID / Customer..." id="case-search" oninput="filterCases()">
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Case ID</th><th>Customer ID</th><th>TX ID</th><th>Opened</th>
+          <th>Status</th><th>Priority</th><th>Fraud Type</th>
+          <th>Amount</th><th>Analyst</th><th>Resolution</th>
+          <th>Recovered</th><th>SLA</th>
+        </tr>
+      </thead>
+      <tbody id="cases-table-body"></tbody>
+    </table>
+    </div>
+    <div class="pagination">
+      <div class="pagination-info" id="cases-pagination-info">Showing 1-20 of 300</div>
+      <div class="pagination-btns" id="cases-pagination-btns"></div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- ============================= PAGE 6: ANALYST ============================= -->
+<div id="page-analyst" class="page">
+  <div class="section-header">
+    <div>
+      <div class="section-title">Analyst <span>Portal</span></div>
+      <div class="section-meta">PERSONAL DASHBOARD · ANALYST</div>
+    </div>
+  </div>
+
+  <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr)">
+    <div class="glass-card kpi-card blue">
+      <div class="kpi-icon"><i class="fas fa-briefcase"></i></div>
+      <div class="kpi-value" style="color:var(--neon-blue)">18</div>
+      <div class="kpi-label">Assigned Cases</div>
+    </div>
+    <div class="glass-card kpi-card orange">
+      <div class="kpi-icon"><i class="fas fa-bell"></i></div>
+      <div class="kpi-value" style="color:var(--neon-orange)">7</div>
+      <div class="kpi-label">Pending Alerts</div>
+    </div>
+    <div class="glass-card kpi-card green">
+      <div class="kpi-icon"><i class="fas fa-chart-line"></i></div>
+      <div class="kpi-value" style="color:var(--neon-green)">94%</div>
+      <div class="kpi-label">Productivity</div>
+    </div>
+    <div class="glass-card kpi-card purple">
+      <div class="kpi-icon"><i class="fas fa-hourglass-half"></i></div>
+      <div class="kpi-value" style="color:var(--neon-purple)">3.8h</div>
+      <div class="kpi-label">Avg Closure</div>
+    </div>
+  </div>
+
+  <div class="col-2 mb16">
+    <div class="glass-card p20">
+      <div class="chart-title" style="margin-bottom:16px">My Active Cases</div>
+      <table class="data-table">
+        <thead>
+          <tr><th>Case ID</th><th>Customer</th><th>Priority</th><th>Fraud Type</th><th>SLA</th></tr>
+        </thead>
+        <tbody id="my-cases-body"></tbody>
+      </table>
+    </div>
+    <div class="glass-card p20">
+      <div class="chart-title" style="margin-bottom:16px">Daily Task List</div>
+      <div id="daily-tasks"></div>
+
+      <div style="margin-top:20px">
+        <div class="chart-title" style="margin-bottom:12px;font-size:12px">Notes Panel</div>
+        <textarea class="filter-input" style="width:100%;height:100px;resize:none;font-size:11px;line-height:1.6" placeholder="Add investigation notes here..."></textarea>
+        <button class="btn btn-primary" style="margin-top:8px"><i class="fas fa-save"></i> Save Note</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- ============================= PAGE 7: ADMIN ============================= -->
+<div id="page-admin" class="page">
+  <div class="section-header">
+    <div>
+      <div class="section-title">Admin <span>Panel</span></div>
+      <div class="section-meta">SYSTEM MANAGEMENT · AUDIT</div>
+    </div>
+  </div>
+
+  <div class="col-3 mb16">
+    <div class="glass-card p20">
+      <div class="chart-title mb16"><i class="fas fa-users" style="color:var(--neon-blue);margin-right:8px"></i>User Management</div>
+      <div style="font-size:11px;color:var(--text-secondary);margin-bottom:12px">25 analysts Â· 3 admins Â· 9,847 customers</div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;margin-bottom:8px"><i class="fas fa-user-plus"></i> Create Analyst</button>
+      <button class="btn btn-outline" style="width:100%;justify-content:center"><i class="fas fa-key"></i> Manage Roles</button>
+      <div id="admin-analysts-list" style="margin-top:12px;max-height:220px;overflow-y:auto"></div>
+    </div>
+    <div class="glass-card p20">
+      <div class="chart-title mb16"><i class="fas fa-sliders-h" style="color:var(--neon-orange);margin-right:8px"></i>Threshold Settings</div>
+      <div style="font-size:11px;color:var(--text-secondary);margin-bottom:12px">Configure fraud detection thresholds</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <span style="font-size:11px;color:var(--text-primary)">Block Threshold</span>
+        <input type="range" min="50" max="100" value="85" style="width:80px;accent-color:var(--neon-red)">
+        <span style="font-size:11px;color:var(--neon-red)">85%</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <span style="font-size:11px;color:var(--text-primary)">Alert Threshold</span>
+        <input type="range" min="30" max="80" value="60" style="width:80px;accent-color:var(--neon-orange)">
+        <span style="font-size:11px;color:var(--neon-orange)">60%</span>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:11px;color:var(--text-primary)">Review Threshold</span>
+        <input type="range" min="10" max="60" value="40" style="width:80px;accent-color:var(--neon-yellow)">
+        <span style="font-size:11px;color:var(--neon-yellow)">40%</span>
+      </div>
+    </div>
+    <div class="glass-card p20">
+      <div class="chart-title mb16"><i class="fas fa-history" style="color:var(--neon-green);margin-right:8px"></i>Audit Log</div>
+      <div id="audit-log" style="max-height:180px;overflow-y:auto"></div>
+    </div>
+  </div>
+
+  <div class="glass-card p20 mb16">
+    <div class="chart-title mb16">Assign Analyst Tasks</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+      <select class="filter-input" id="task-analyst-select" style="min-width:180px"></select>
+      <input class="filter-input" id="task-case-id" placeholder="Case ID optional" style="min-width:150px">
+      <input class="filter-input" id="task-title" placeholder="Task title / case instruction" style="min-width:260px">
+      <button class="btn btn-primary" onclick="assignTaskToAnalyst()"><i class="fas fa-user-check"></i> Assign</button>
+    </div>
+    <div id="assigned-tasks-list" style="max-height:220px;overflow-y:auto"></div>
+  </div>
+
+  <!-- Fraud Rules -->
+  <div class="glass-card p20 mb16">
+    <div class="chart-title mb16">Fraud Detection Rules Engine</div>
+    <div class="admin-grid" id="rules-grid"></div>
+  </div>
+
+  <!-- System Stats -->
+  <div class="col-3">
+    <div class="glass-card p20">
+      <div class="chart-title mb16">System Health</div>
+      <div id="system-health"></div>
+    </div>
+    <div class="glass-card p20">
+      <div class="chart-title mb16">Model Performance</div>
+      <div class="chart-container short">
+        <canvas id="chart-model-perf"></canvas>
+      </div>
+    </div>
+    <div class="glass-card p20">
+      <div class="chart-title mb16">Recent Admin Actions</div>
+      <div id="admin-actions"></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end #main -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+
+function loginUser(){
+  const email = document.getElementById("loginEmail").value.trim();
+  const pass = document.getElementById("loginPassword").value;
+  const errEl = document.getElementById("loginError");
+  errEl.style.display = "none";
+
+  if(!email || !pass){
+    errEl.style.display = "flex"; errEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Please fill in all fields'; return;
+  }
+
+  const fd = new FormData();
+  fd.append("email", email); fd.append("password", pass);
+  fetch("db.php?action=login", { method:"POST", body:fd })
+    .then(r => r.json())
+    .then(data => {
+      if(data.success){
+        document.getElementById("loginScreen").style.display = "none";
+        // Update sidebar with logged-in user
+        const initials = data.name.split(" ").map(n=>n[0]).join("").substring(0,2).toUpperCase();
+        document.querySelector(".analyst-name").textContent = data.name;
+        document.querySelector(".analyst-role").textContent = data.role.charAt(0).toUpperCase()+data.role.slice(1)+" Â· Online";
+        document.querySelector(".analyst-avatar").textContent = initials;
+        // Load real stats
+        loadDashboardStats();
+      } else {
+        errEl.style.display = "flex";
+        errEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + (data.error||"Invalid credentials");
+      }
+    })
+    .catch(() => {
+      // Fallback for local dev without PHP
+      if(email === "admin@fraudshield.com" && pass === "admin123"){
+        document.getElementById("loginScreen").style.display = "none";
+        loadDashboardStats();
+      } else {
+        errEl.style.display = "flex";
+        errEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Invalid credentials';
+      }
+    });
+}
+
+
+
+
+function showSignup(){
+ document.getElementById("loginBox").style.display="none";
+ document.getElementById("signupBox").style.display="block";
+}
+
+function showLogin(){
+ document.getElementById("loginBox").style.display="block";
+ document.getElementById("signupBox").style.display="none";
+ document.getElementById("loginError").style.display="none";
+ document.getElementById("signupError").style.display="none";
+}
+
+function signupUser(){
+  const name  = document.getElementById("signupName").value.trim();
+  const email = document.getElementById("signupEmail").value.trim();
+  const pass  = document.getElementById("signupPass").value;
+  const pass2 = document.getElementById("signupPass2").value;
+  const errEl = document.getElementById("signupError");
+  const errTxt= document.getElementById("signupErrorText");
+  errEl.style.display = "none";
+
+  const showErr = (msg) => {
+    errTxt.textContent = msg;
+    errEl.style.display = "flex";
+  };
+
+  if(!name || !email || !pass || !pass2) return showErr("Please fill in all fields");
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return showErr("Enter a valid email address");
+  if(pass.length < 6) return showErr("Password must be at least 6 characters");
+  if(pass !== pass2) return showErr("Passwords do not match");
+
+  const fd = new FormData();
+  fd.append("name", name); fd.append("email", email); fd.append("password", pass);
+  fetch("db.php?action=signup", { method:"POST", body:fd })
+    .then(r => r.json())
+    .then(data => {
+      if(data.success){
+        showLogin();
+        setTimeout(() => {
+          document.getElementById("loginEmail").value = email;
+          // Show success toast
+          const t = document.createElement("div");
+          t.style.cssText = "position:fixed;top:20px;left:50%;transform:translateX(-50%);background:rgba(0,255,157,0.15);border:1px solid rgba(0,255,157,0.4);color:var(--neon-green);padding:12px 24px;border-radius:10px;font-size:12px;z-index:999999;display:flex;align-items:center;gap:8px";
+          t.innerHTML = '<i class="fas fa-check-circle"></i> Account created! Please sign in.';
+          document.body.appendChild(t);
+          setTimeout(()=>t.remove(), 4000);
+        }, 100);
+      } else {
+        showErr(data.error || "Registration failed. Try again.");
+      }
+    })
+    .catch(() => showErr("Could not connect. Please try again."));
+}
+
+
+
+
+/* ===== THEME TOGGLE ===== */
+function toggleTheme(){
+  document.body.classList.toggle("light-mode");
+
+  const icon = document.querySelector("#themeBtn i");
+
+  if(document.body.classList.contains("light-mode")){
+    icon.className = "fas fa-sun";
+    localStorage.setItem("theme","light");
+  } else {
+    icon.className = "fas fa-moon";
+    localStorage.setItem("theme","dark");
+  }
+}
+
+window.onload = function(){
+  if(localStorage.getItem("theme")==="light"){
+    document.body.classList.add("light-mode");
+
+    const icon = document.querySelector("#themeBtn i");
+    if(icon){
+      icon.className = "fas fa-sun";
+    }
+  }
+};
+
+// ============================================================
+// DATABASE-BACKED DATA MODEL
+// ============================================================
+const METHODS = ['P2P','ATM','Mobile','Wire','InStore','Online','POS','Transfer'];
+const FRAUD_TYPES = ['Card Fraud','Identity Theft','Account Takeover','Wire Fraud','P2P Fraud','ATM Fraud','Mobile Fraud','Online Fraud'];
+const STATUSES = ['Blocked','Flagged','Under Review','Cleared'];
+const RISK_LEVELS = ['Critical','High','Medium','Low'];
+const CASE_STATUSES = ['Open','Under Review','Pending Docs','Closed'];
+const PRIORITIES = ['Critical','High','Medium','Low'];
+const RESOLUTIONS = ['Pending','No Fraud','Fraud Confirmed','Escalated'];
+const ALERT_TYPES = ['Velocity Check','Geo Anomaly','Device Mismatch','IP Blacklist','Amount Threshold','Behavioral','Account Takeover','Login Anomaly'];
+const QUEUE_STATUSES = ['New','Open','Escalated','Resolved','Pending','Investigating'];
+const MERCHANTS = ['Amazon','Walmart','PayPal','Zelle','Venmo','Chase Bank','Best Buy','Apple Pay','Google Pay','Stripe','Square','Western Union','MoneyGram','Coinbase','Binance','Target','Netflix','Uber','Lyft','DoorDash'];
+const LOCATIONS = ['New York, US','Los Angeles, US','London, UK','Toronto, CA','Dubai, UAE','Karachi, PK','Mumbai, IN','Lagos, NG','Sydney, AU','Berlin, DE','Paris, FR','Tokyo, JP','Singapore, SG','Sao Paulo, BR','Mexico City, MX'];
+const DEVICES = ['iPhone 15 Pro','Samsung Galaxy S24','Windows PC','MacBook Pro','iPad Air','Android Tablet','Unknown Device','Linux Server','Chrome OS'];
+const FIRST_NAMES = ['James','Sarah','Michael','Emma','David','Olivia','Robert','Sophia','William','Ava','John','Isabella','Chris','Mia','Daniel','Charlotte','Matthew','Amelia','Anthony','Harper','Carlos','Fatima','Ahmed','Priya','Yuki'];
+const LAST_NAMES = ['Smith','Johnson','Williams','Brown','Jones','Garcia','Martinez','Davis','Rodriguez','Wilson','Anderson','Taylor','Thomas','Moore','Jackson','Martin','Lee','Perez','Thompson','White','Hassan','Patel','Kim','Muller','Nakamura'];
+const ANALYST_NAMES = ['Alex Chen','Maya Torres','Jake Wilson','Priya Sharma','Carlos Ruiz','Sarah Abadi','Tom Bradley','Nina Okafor','Ryan Park','Leila Hassan','Marco Bianchi','Ana Lima','Kevin Wu','Zara Ahmed','Felix Wagner','Imani Osei','Hiroshi Tanaka','Elena Volkov','Omar Al-Farsi','Chidinma Eze','Lars Eriksson','Fatima Malik','Diego Herrera','Yuki Watanabe','Nadia Kozlov'];
+
+
+
+/* ===== bridigng betwen php dashboard fle and database===== */
+const API_URL = 'db.php';
+const TRANSACTIONS = [];
+const ALERTS = [];
+const CASES = [];
+let DASHBOARD_STATS = {};
+let DASHBOARD_CHARTS = {};
+let ADMIN_DATA = {};
+let ACTIVE_PAGE = 'dashboard';
+let CURRENT_USER = null;
+
+function rnd(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function pick(arr) { return arr[rnd(0, arr.length - 1)]; }
+function randName() { return pick(FIRST_NAMES) + ' ' + pick(LAST_NAMES); }
+
+async function api(action, params = {}, options = {}) {
+  const url = new URL(API_URL, window.location.href);
+  url.searchParams.set('action', action);
+  Object.entries(params).forEach(([key, value]) => {
+    if(value !== undefined && value !== null && value !== '') url.searchParams.set(key, value);
+  });
+  const response = await fetch(url.toString(), options);
+  const data = await response.json();
+  if(!response.ok || data.error) throw new Error(data.error || 'Database request failed');
+  return data;
+}
+
+function postForm(action, values) {
+  const fd = new FormData();
+  Object.entries(values).forEach(([key, value]) => fd.append(key, value ?? ''));
+  return api(action, {}, { method: 'POST', body: fd });
+}
+
+function normalizeTransaction(row) {
+  return { ...row, amount: parseFloat(row.amount || 0).toFixed(2), score: parseInt(row.score || 0, 10), dt: row.dt ? new Date(row.dt) : new Date() };
+}
+
+function normalizeCase(row) {
+  return { ...row, fraudAmt: parseFloat(row.fraudAmt || 0).toFixed(2), recoveredAmt: parseFloat(row.recoveredAmt || 0).toFixed(2), slaOverdue: row.slaOverdue === true || row.slaOverdue === '1' || row.slaOverdue === 1 };
+}
+
+function normalizeAlert(row) {
+  return { ...row, score: parseInt(row.score || 0, 10), minsOpen: parseInt(row.minsOpen || 0, 10), dt: row.dt ? new Date(row.dt) : new Date() };
+}
+
+function toast(message, good = true) {
+  const t = document.createElement('div');
+  t.style.cssText = `position:fixed;bottom:24px;right:24px;background:${good?'rgba(0,255,157,0.15)':'rgba(255,45,85,0.15)'};border:1px solid ${good?'rgba(0,255,157,0.4)':'rgba(255,45,85,0.4)'};color:${good?'var(--neon-green)':'var(--neon-red)'};padding:10px 18px;border-radius:10px;font-size:11px;z-index:99999;display:flex;align-items:center;gap:8px`;
+  t.innerHTML = `<i class="fas ${good?'fa-check':'fa-exclamation-triangle'}"></i> ${message}`;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(), 2600);
+}
+
+function fmtDate(d) {
+  if(!(d instanceof Date)) d = new Date(d);
+  return d.toLocaleDateString('en-US',{month:'short',day:'2-digit',year:'numeric'}) + ' ' +
+         d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false});
+}
+
+function timeAgo(mins) {
+  mins = parseInt(mins || 0, 10);
+  if(mins < 60) return mins + 'm ago';
+  if(mins < 1440) return Math.floor(mins/60) + 'h ago';
+  return Math.floor(mins/1440) + 'd ago';
+}
+
+function generateIP() { return `${rnd(1,254)}.${rnd(0,255)}.${rnd(0,255)}.${rnd(1,254)}`; }
+function generateAccount() { return '**** **** ' + String(rnd(1000,9999)); }
+
+function downloadPDF(){ window.print(); }
+
+
+
+
+
+
+
+// ============================================================
+// PAGE NAVIGATION
+// ============================================================
+const PAGE_TITLES = {
+  dashboard: 'Executive Overview',
+  transactions: 'Transaction Monitoring',
+  investigation: 'Customer Investigation',
+  cases: 'Case Management',
+  alerts: 'Alerts & Queues',
+  analyst: 'Analyst Portal',
+  admin: 'Admin Panel'
+};
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.getElementById('topbar-title').textContent = PAGE_TITLES[id];
+  event && event.currentTarget && event.currentTarget.classList.add('active');
+
+  // Find and activate nav item
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if(n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + id + "'")) n.classList.add('active');
+  });
+
+  // Init page-specific content
+  if(id === 'dashboard') initDashboard();
+  if(id === 'transactions') initTransactions();
+  if(id === 'cases') initCases();
+  if(id === 'alerts') initAlerts();
+  if(id === 'analyst') initAnalyst();
+  if(id === 'admin') initAdmin();
+}
+
+
+
+
+
+
+
+
+
+
+// ============================================================
+// CHART HELPERS
+// ============================================================
+const CHART_DEFAULTS = {
+  color: 'rgba(122,155,181,0.8)',
+  gridColor: 'rgba(255,255,255,0.04)',
+  fontFamily: "'JetBrains Mono', monospace",
+};
+
+function baseChartOptions(extra={}) {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        labels: { color: CHART_DEFAULTS.color, font: { family: CHART_DEFAULTS.fontFamily, size: 10 }, boxWidth: 10 }
+      },
+      tooltip: {
+        backgroundColor: 'rgba(4,8,20,0.95)',
+        borderColor: 'rgba(0,200,255,0.3)',
+        borderWidth: 1,
+        titleColor: '#e8f4fd',
+        bodyColor: CHART_DEFAULTS.color,
+        titleFont: { family: CHART_DEFAULTS.fontFamily },
+        bodyFont: { family: CHART_DEFAULTS.fontFamily, size: 11 }
+      }
+    },
+    scales: {
+      x: {
+        grid: { color: CHART_DEFAULTS.gridColor },
+        ticks: { color: CHART_DEFAULTS.color, font: { family: CHART_DEFAULTS.fontFamily, size: 9 } }
+      },
+      y: {
+        grid: { color: CHART_DEFAULTS.gridColor },
+        ticks: { color: CHART_DEFAULTS.color, font: { family: CHART_DEFAULTS.fontFamily, size: 9 } }
+      }
+    },
+    ...extra
+  };
+}
+
+const chartInstances = {};
+
+function destroyChart(id) {
+  if(chartInstances[id]) { chartInstances[id].destroy(); delete chartInstances[id]; }
+}
+
+
+
+
+
+
+
+
+// ============================================================
+// DASHBOARD INIT
+// ============================================================
+function initDashboard() {
+  renderHighRiskTable();
+  initFraudTypeChart();
+  initDailyTrendChart();
+  initLossRecoveryChart();
+  initByChannelChart();
+}
+
+function renderHighRiskTable() {
+  const highRisk = TRANSACTIONS.filter(t => t.score >= 75).slice(0,12);
+  const tbody = document.getElementById('dash-tx-body');
+  tbody.innerHTML = highRisk.map(t => `
+    <tr class="${t.score >= 85 ? 'high-risk glow-row' : ''}">
+      <td><span class="tx-id" style="font-family:var(--font-mono)">${t.id}</span></td>
+      <td style="color:var(--text-primary)">${t.custName}</td>
+      <td><span class="badge badge-blue">${t.method}</span></td>
+      <td style="color:var(--neon-blue);font-family:var(--font-mono)">$${parseFloat(t.amount).toLocaleString()}</td>
+      <td>${fraudBar(t.score)}</td>
+      <td style="color:var(--text-dim);font-size:10px">${timeAgo(rnd(1,120))}</td>
+      <td>${statusBadge(t.status)}</td>
+    </tr>
+  `).join('');
+}
+
+function fraudBar(score) {
+  const color = score >= 81 ? 'var(--neon-red)' : score >= 61 ? 'var(--neon-orange)' : score >= 31 ? 'var(--neon-yellow)' : 'var(--neon-green)';
+  return `<div class="fraud-bar">
+    <div class="fraud-bar-track"><div class="fraud-bar-fill" style="width:${score}%;background:${color}"></div></div>
+    <span class="fraud-bar-value" style="color:${color}">${score}%</span>
+  </div>`;
+}
+
+function statusBadge(status) {
+  const map = { 'Blocked':'badge-red','Flagged':'badge-orange','Under Review':'badge-yellow','Cleared':'badge-green' };
+  return `<span class="badge ${map[status]||'badge-gray'}">${status}</span>`;
+}
+
+function priorityBadge(p) {
+  const map = { 'Critical':'badge-red','High':'badge-orange','Medium':'badge-yellow','Low':'badge-green' };
+  return `<span class="badge ${map[p]||'badge-gray'}">${p}</span>`;
+}
+
+function severityBadge(s) {
+  const map = { 'Critical':'badge-red','High':'badge-orange','Medium':'badge-yellow','Low':'badge-green' };
+  return `<span class="badge ${map[s]||'badge-gray'}">${s}</span>`;
+}
+
+function initFraudTypeChart() {
+  destroyChart('fraud-type');
+  const ctx = document.getElementById('chart-fraud-type').getContext('2d');
+  const vals = [234,156,189,98,267,145,178,312];
+  chartInstances['fraud-type'] = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: FRAUD_TYPES,
+      datasets: [{
+        data: vals,
+        backgroundColor: [
+          'rgba(255,45,85,0.8)','rgba(0,200,255,0.8)','rgba(191,90,242,0.8)',
+          'rgba(255,107,43,0.8)','rgba(0,255,157,0.8)','rgba(255,214,10,0.8)',
+          'rgba(100,200,255,0.8)','rgba(255,100,150,0.8)'
+        ],
+        borderColor: 'rgba(4,8,20,0.5)',
+        borderWidth: 2,
+        hoverOffset: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '65%',
+      plugins: {
+        legend: {
+          position: 'right',
+          labels: { color: CHART_DEFAULTS.color, font: { family: CHART_DEFAULTS.fontFamily, size: 9 }, boxWidth: 8, padding: 8 }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(4,8,20,0.95)',
+          borderColor: 'rgba(0,200,255,0.3)',
+          borderWidth: 1,
+          titleColor: '#e8f4fd',
+          bodyColor: CHART_DEFAULTS.color,
+          bodyFont: { family: CHART_DEFAULTS.fontFamily, size: 11 }
+        }
+      }
+    }
+  });
+}
+
+function initDailyTrendChart() {
+  destroyChart('daily-trend');
+  const ctx = document.getElementById('chart-daily-trend').getContext('2d');
+  const labels = [];
+  const txData = [];
+  const fraudData = [];
+  for(let i = 29; i >= 0; i--) {
+    const d = new Date(Date.now() - i*86400000);
+    labels.push(d.toLocaleDateString('en-US',{month:'short',day:'2-digit'}));
+    txData.push(rnd(280,420));
+    fraudData.push(rnd(8,32));
+  }
+  chartInstances['daily-trend'] = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Total Transactions',
+          data: txData,
+          borderColor: 'rgba(0,200,255,0.8)',
+          backgroundColor: 'rgba(0,200,255,0.06)',
+          fill: true,
+          tension: 0.4,
+          pointRadius: 0,
+          borderWidth: 2
+        },
+        {
+          label: 'Fraud Events',
+          data: fraudData,
+          borderColor: 'rgba(255,45,85,0.9)',
+          backgroundColor: 'rgba(255,45,85,0.08)',
+          fill: true,
+          tension: 0.4,
+          pointRadius: 2,
+          borderWidth: 2,
+          yAxisID: 'y1'
+        }
+      ]
+    },
+    options: {
+      ...baseChartOptions(),
+      scales: {
+        x: { grid: { color: CHART_DEFAULTS.gridColor }, ticks: { color: CHART_DEFAULTS.color, font: { family: CHART_DEFAULTS.fontFamily, size: 9 }, maxTicksLimit: 8 } },
+        y: { grid: { color: CHART_DEFAULTS.gridColor }, ticks: { color: CHART_DEFAULTS.color, font: { family: CHART_DEFAULTS.fontFamily, size: 9 } } },
+        y1: { position: 'right', grid: { display: false }, ticks: { color: 'rgba(255,45,85,0.7)', font: { family: CHART_DEFAULTS.fontFamily, size: 9 } } }
+      }
+    }
+  });
+}
+
+function initLossRecoveryChart() {
+  destroyChart('loss-recovery');
+  const ctx = document.getElementById('chart-loss-recovery').getContext('2d');
+  const months = ['Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr'];
+  chartInstances['loss-recovery'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: months,
+      datasets: [
+        { label: 'Fraud Losses ($K)', data: months.map(()=>rnd(80,180)), backgroundColor: 'rgba(255,45,85,0.65)', borderRadius: 4 },
+        { label: 'Recoveries ($K)', data: months.map(()=>rnd(40,100)), backgroundColor: 'rgba(0,255,157,0.65)', borderRadius: 4 }
+      ]
+    },
+    options: baseChartOptions()
+  });
+}
+
+function initByChannelChart() {
+  destroyChart('by-channel');
+  const ctx = document.getElementById('chart-by-channel').getContext('2d');
+  chartInstances['by-channel'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: METHODS,
+      datasets: [{
+        label: 'Fraud Events',
+        data: METHODS.map(()=>rnd(20,120)),
+        backgroundColor: [
+          'rgba(0,200,255,0.7)','rgba(255,45,85,0.7)','rgba(0,255,157,0.7)',
+          'rgba(191,90,242,0.7)','rgba(255,107,43,0.7)','rgba(255,214,10,0.7)',
+          'rgba(100,180,255,0.7)','rgba(255,100,180,0.7)'
+        ],
+        borderRadius: 5
+      }]
+    },
+    options: { ...baseChartOptions(), plugins: { legend: { display: false } } }
+  });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ============================================================
+// TRANSACTIONS PAGE
+// ============================================================
+let txPage = 1;
+const TX_PER_PAGE = 25;
+let filteredTx = [...TRANSACTIONS];
+
+function initTransactions() {
+  filteredTx = [...TRANSACTIONS];
+  renderTxTable();
+}
+
+function filterTx() {
+  const sid = document.getElementById('tx-search-id').value.toLowerCase();
+  const sname = document.getElementById('tx-search-name').value.toLowerCase();
+  const method = document.getElementById('tx-filter-method').value;
+  const risk = document.getElementById('tx-filter-risk').value;
+  const status = document.getElementById('tx-filter-status').value;
+  const minScore = parseInt(document.getElementById('tx-filter-minscore').value) || 0;
+
+  filteredTx = TRANSACTIONS.filter(t =>
+    (!sid || t.id.toLowerCase().includes(sid)) &&
+    (!sname || t.custName.toLowerCase().includes(sname)) &&
+    (!method || t.method === method) &&
+    (!risk || t.risk === risk) &&
+    (!status || t.status === status) &&
+    t.score >= minScore
+  );
+  txPage = 1;
+  renderTxTable();
+}
+
+function renderTxTable() {
+  const start = (txPage-1)*TX_PER_PAGE;
+  const slice = filteredTx.slice(start, start+TX_PER_PAGE);
+  document.getElementById('tx-table-body').innerHTML = slice.map(t => {
+    const hr = t.score >= 75;
+    return `<tr class="${hr ? 'high-risk' : ''}">
+      <td><span style="font-family:var(--font-mono);color:${hr?'var(--neon-red)':'var(--neon-blue)'}">${t.id}</span></td>
+      <td style="font-size:10px">${fmtDate(t.dt)}</td>
+      <td style="color:var(--text-primary)">${t.custName}</td>
+      <td style="font-family:var(--font-mono);font-size:10px">${t.account}</td>
+      <td><span class="badge badge-blue">${t.method}</span></td>
+      <td>${t.merchant}</td>
+      <td style="font-size:10px">${t.location}</td>
+      <td style="font-size:10px">${t.device.substring(0,14)}</td>
+      <td style="font-family:var(--font-mono);color:var(--neon-blue)">$${parseFloat(t.amount).toLocaleString()}</td>
+      <td style="min-width:130px">${fraudBar(t.score)}</td>
+      <td>${priorityBadge(t.risk)}</td>
+      <td>${statusBadge(t.status)}</td>
+    </tr>`;
+  }).join('');
+
+  const total = filteredTx.length;
+  document.getElementById('tx-pagination-info').textContent = `Showing ${start+1}-${Math.min(start+TX_PER_PAGE,total)} of ${total.toLocaleString()}`;
+  renderPagination('tx-pagination-btns', txPage, Math.ceil(total/TX_PER_PAGE), p => { txPage = p; renderTxTable(); });
+}
+
+function renderPagination(id, current, total, cb) {
+  const el = document.getElementById(id);
+  const pages = Math.min(total, 7);
+  let html = '';
+  if(current > 1) html += `<button class="page-btn" onclick="(${cb.toString()})(${current-1})"><i class="fas fa-chevron-left"></i></button>`;
+  for(let i = Math.max(1, current-3); i <= Math.min(total, Math.max(1,current-3)+pages-1); i++) {
+    html += `<button class="page-btn ${i===current?'active':''}" onclick="(${cb.toString()})(${i})">${i}</button>`;
+  }
+  if(current < total) html += `<button class="page-btn" onclick="(${cb.toString()})(${current+1})"><i class="fas fa-chevron-right"></i></button>`;
+  el.innerHTML = html;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ============================================================
+// CUSTOMER INVESTIGATION
+// ============================================================
+let riskTrendChart = null;
+
+function searchCustomer(mode) {
+  let custId;
+  if(mode === 'random') {
+    custId = 'CUST-' + String(rnd(1,1000)).padStart(4,'0');
+    document.getElementById('cust-search-input').value = custId;
+  } else {
+    custId = document.getElementById('cust-search-input').value.trim();
+    if(!custId) return;
+  }
+
+  const custTx = TRANSACTIONS.filter(t => t.custId === custId || t.custName.toLowerCase().includes(custId.toLowerCase()));
+  if(custTx.length === 0) {
+    // Use random customer
+    const randomCust = TRANSACTIONS[rnd(0,9999)];
+    const rxTx = TRANSACTIONS.filter(t => t.custId === randomCust.custId).slice(0,20);
+    renderInvestigation(randomCust.custName, randomCust.custId, rxTx);
+  } else {
+    renderInvestigation(custTx[0].custName, custTx[0].custId, custTx.slice(0,20));
+  }
+}
+
+function renderInvestigation(name, id, txList) {
+  document.getElementById('cust-results').style.display = 'block';
+  const initials = name.split(' ').map(n=>n[0]).join('');
+  const avgScore = txList.reduce((a,b) => a + b.score, 0) / (txList.length||1);
+  const riskRating = avgScore >= 70 ? 'HIGH' : avgScore >= 40 ? 'MEDIUM' : 'LOW';
+  const riskColor = avgScore >= 70 ? 'var(--neon-red)' : avgScore >= 40 ? 'var(--neon-orange)' : 'var(--neon-green)';
+
+  document.getElementById('cust-summary-card').innerHTML = `
+    <div class="cust-avatar-lg" style="background:linear-gradient(135deg,var(--neon-blue),var(--neon-purple))">${initials}</div>
+    <div>
+      <div style="font-family:var(--font-display);font-size:18px;font-weight:800;color:var(--text-primary)">${name}</div>
+      <div style="font-size:12px;color:var(--text-secondary);margin-top:4px">${id}</div>
+      <div style="margin-top:12px;padding:6px 12px;background:rgba(${avgScore>=70?'255,45,85':'0,255,157'},0.1);border:1px solid rgba(${avgScore>=70?'255,45,85':'0,255,157'},0.3);border-radius:6px;font-size:11px;color:${riskColor};display:inline-block">
+        RISK: ${riskRating}
+      </div>
+    </div>
+    <div>
+      <div class="cust-detail-item"><div class="cust-detail-label">Total Transactions</div><div class="cust-detail-value">${txList.length}</div></div>
+      <div class="cust-detail-item"><div class="cust-detail-label">Total Volume</div><div class="cust-detail-value">$${txList.reduce((a,b)=>a+parseFloat(b.amount),0).toLocaleString('en-US',{maximumFractionDigits:0})}</div></div>
+      <div class="cust-detail-item"><div class="cust-detail-label">Last Login</div><div class="cust-detail-value">${timeAgo(rnd(5,480))}</div></div>
+    </div>
+    <div>
+      <div class="cust-detail-item"><div class="cust-detail-label">Registered Device</div><div class="cust-detail-value">${txList[0]?.device||'Unknown'}</div></div>
+      <div class="cust-detail-item"><div class="cust-detail-label">Current Case</div><div class="cust-detail-value">${CASES.find(c=>c.custId===id)?.id||'None Active'}</div></div>
+      <div class="cust-detail-item"><div class="cust-detail-label">Avg Fraud Score</div><div class="cust-detail-value" style="color:${riskColor}">${avgScore.toFixed(1)}%</div></div>
+    </div>
+  `;
+
+  // Timeline
+  const events = [
+    { type: 'blue', time: '3h ago', event: 'Session Started', desc: 'New login from ' + txList[0]?.location },
+    { type: txList[0]?.score>70?'red':'green', time: '2h ago', event: txList[0]?.score>70?'Suspicious Transaction':'Normal Transaction', desc: txList[0]?.id + ' â€” $' + parseFloat(txList[0]?.amount||0).toFixed(0) },
+    { type: 'yellow', time: '1d ago', event: 'Password Reset', desc: 'Via email verification' },
+    { type: 'orange', time: '2d ago', event: 'Device Change', desc: 'New device: ' + (txList[1]?.device||'iPhone 14') },
+    { type: 'red', time: '3d ago', event: 'Large Wire Attempt', desc: 'International wire $' + rnd(5000,15000).toLocaleString() },
+    { type: 'blue', time: '5d ago', event: 'ATM Withdrawal', desc: '$' + rnd(200,1000) + ' from foreign ATM' },
+    { type: 'red', time: '7d ago', event: 'Transaction Blocked', desc: 'Exceeded velocity threshold' },
+    { type: 'green', time: '10d ago', event: 'Case Resolved', desc: 'Previous case closed â€” No fraud' },
+  ];
+  document.getElementById('cust-timeline').innerHTML = events.map(e => `
+    <div class="timeline-item">
+      <div class="timeline-dot ${e.type}"></div>
+      <div class="timeline-time">${e.time}</div>
+      <div class="timeline-event">${e.event}</div>
+      <div class="timeline-desc">${e.desc}</div>
+    </div>
+  `).join('');
+
+  // Heatmap
+  const heatData = Array(24).fill(0).map(()=>rnd(0,10));
+  const maxH = Math.max(...heatData);
+  document.getElementById('heatmap-grid').innerHTML = heatData.map((v,i) => {
+    const intensity = v/maxH;
+    const r = Math.round(255 * intensity);
+    const g = Math.round(45 + (157-45)*(1-intensity));
+    const b = Math.round(85 + (200-85)*(1-intensity));
+    return `<div class="heat-cell" style="background:rgba(${r},${g},${b},${0.2+intensity*0.6})" title="${String(i).padStart(2,'0')}:00 â€” ${v} events"></div>`;
+  }).join('');
+
+  // Transaction table
+  document.getElementById('cust-tx-body').innerHTML = txList.map(t => `
+    <tr>
+      <td style="font-size:10px">${fmtDate(t.dt)}</td>
+      <td style="font-family:var(--font-mono);color:var(--neon-blue)">${t.id}</td>
+      <td><span class="badge badge-blue">${t.method}</span></td>
+      <td>${t.merchant}</td>
+      <td style="font-family:var(--font-mono)">$${parseFloat(t.amount).toLocaleString()}</td>
+      <td style="min-width:130px">${fraudBar(t.score)}</td>
+      <td>${statusBadge(t.status)}</td>
+    </tr>
+  `).join('');
+
+  // Risk trend chart
+  if(riskTrendChart) { riskTrendChart.destroy(); }
+  const ctx = document.getElementById('chart-risk-trend').getContext('2d');
+  const days = [];
+  const scores = [];
+  for(let i=29;i>=0;i--) {
+    days.push(new Date(Date.now()-i*86400000).toLocaleDateString('en-US',{month:'short',day:'2-digit'}));
+    scores.push(rnd(5,95));
+  }
+  riskTrendChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: days,
+      datasets: [{
+        label: 'Fraud Score %',
+        data: scores,
+        borderColor: 'rgba(255,45,85,0.8)',
+        backgroundColor: 'rgba(255,45,85,0.08)',
+        fill: true,
+        tension: 0.4,
+        pointRadius: 0,
+        borderWidth: 2
+      }]
+    },
+    options: { ...baseChartOptions(), scales: {
+      x: { grid: { color: CHART_DEFAULTS.gridColor }, ticks: { color: CHART_DEFAULTS.color, font: { family: CHART_DEFAULTS.fontFamily, size: 9 }, maxTicksLimit: 6 } },
+      y: { grid: { color: CHART_DEFAULTS.gridColor }, ticks: { color: CHART_DEFAULTS.color, font: { family: CHART_DEFAULTS.fontFamily, size: 9 } }, min: 0, max: 100 }
+    }}
+  });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ============================================================
+// CASES PAGE
+// ============================================================
+let casePage = 1;
+const CASES_PER_PAGE = 20;
+let filteredCases = [...CASES];
+
+function initCases() {
+  filteredCases = [...CASES];
+  renderCasesTable();
+  initCasesCharts();
+  renderAnalystRanking();
+}
+
+function filterCases() {
+  const status = document.getElementById('case-filter-status').value;
+  const priority = document.getElementById('case-filter-priority').value;
+  const search = document.getElementById('case-search').value.toLowerCase();
+  filteredCases = CASES.filter(c =>
+    (!status || c.status === status) &&
+    (!priority || c.priority === priority) &&
+    (!search || c.id.toLowerCase().includes(search) || c.custId.toLowerCase().includes(search))
+  );
+  casePage = 1;
+  renderCasesTable();
+}
+
+function renderCasesTable() {
+  const start = (casePage-1)*CASES_PER_PAGE;
+  const slice = filteredCases.slice(start, start+CASES_PER_PAGE);
+  document.getElementById('cases-table-body').innerHTML = slice.map(c => `
+    <tr>
+      <td style="font-family:var(--font-mono);color:var(--neon-blue)">${c.id}</td>
+      <td style="color:var(--text-secondary)">${c.custId}</td>
+      <td style="font-family:var(--font-mono);font-size:10px">${c.txId}</td>
+      <td style="font-size:10px">${c.opened}</td>
+      <td>${caseStatusBadge(c.status)}</td>
+      <td>${priorityBadge(c.priority)}</td>
+      <td style="font-size:10px">${c.fraudType}</td>
+      <td style="font-family:var(--font-mono);color:var(--neon-red)">$${parseFloat(c.fraudAmt).toLocaleString()}</td>
+      <td style="font-size:10px">${c.analyst}</td>
+      <td>${resolutionBadge(c.resolution)}</td>
+      <td style="font-family:var(--font-mono);color:var(--neon-green)">$${parseFloat(c.recoveredAmt).toLocaleString()}</td>
+      <td><span style="font-size:10px;color:${c.slaOverdue?'var(--neon-red)':'var(--text-secondary)'}">${c.sla}${c.slaOverdue?' âš ':''}
+      </span></td>
+    </tr>
+  `).join('');
+  const total = filteredCases.length;
+  document.getElementById('cases-pagination-info').textContent = `Showing ${start+1}-${Math.min(start+CASES_PER_PAGE,total)} of ${total}`;
+  renderPagination('cases-pagination-btns', casePage, Math.ceil(total/CASES_PER_PAGE), p => { casePage = p; renderCasesTable(); });
+}
+
+function caseStatusBadge(s) {
+  const map = { 'Open':'badge-orange','Under Review':'badge-yellow','Pending Docs':'badge-purple','Closed':'badge-green' };
+  return `<span class="badge ${map[s]||'badge-gray'}">${s}</span>`;
+}
+
+function resolutionBadge(r) {
+  const map = { 'Pending':'badge-yellow','No Fraud':'badge-green','Fraud Confirmed':'badge-red','Escalated':'badge-orange' };
+  return `<span class="badge ${map[r]||'badge-gray'}">${r}</span>`;
+}
+
+function initCasesCharts() {
+  destroyChart('cases-weekly');
+  const ctx1 = document.getElementById('chart-cases-weekly').getContext('2d');
+  const weeks = ['W1','W2','W3','W4','W5','W6','W7','W8'];
+  chartInstances['cases-weekly'] = new Chart(ctx1, {
+    type: 'bar',
+    data: {
+      labels: weeks,
+      datasets: [
+        { label: 'Opened', data: weeks.map(()=>rnd(20,50)), backgroundColor: 'rgba(255,107,43,0.65)', borderRadius: 4 },
+        { label: 'Resolved', data: weeks.map(()=>rnd(15,45)), backgroundColor: 'rgba(0,255,157,0.65)', borderRadius: 4 }
+      ]
+    },
+    options: baseChartOptions()
+  });
+
+  destroyChart('recovery-rate');
+  const ctx2 = document.getElementById('chart-recovery-rate').getContext('2d');
+  chartInstances['recovery-rate'] = new Chart(ctx2, {
+    type: 'line',
+    data: {
+      labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug'],
+      datasets: [{
+        label: 'Recovery Rate %',
+        data: [38,42,45,51,48,55,58,62],
+        borderColor: 'rgba(0,255,157,0.8)',
+        backgroundColor: 'rgba(0,255,157,0.08)',
+        fill: true,
+        tension: 0.4,
+        pointRadius: 3,
+        pointBackgroundColor: 'rgba(0,255,157,0.8)',
+        borderWidth: 2
+      }]
+    },
+    options: { ...baseChartOptions(), scales: {
+      x: { grid: { color: CHART_DEFAULTS.gridColor }, ticks: { color: CHART_DEFAULTS.color, font: { family: CHART_DEFAULTS.fontFamily, size: 9 } } },
+      y: { grid: { color: CHART_DEFAULTS.gridColor }, ticks: { color: CHART_DEFAULTS.color, font: { family: CHART_DEFAULTS.fontFamily, size: 9 } }, max: 100 }
+    }}
+  });
+
+  destroyChart('cases-monthly');
+  const ctx3 = document.getElementById('chart-cases-monthly').getContext('2d');
+  chartInstances['cases-monthly'] = new Chart(ctx3, {
+    type: 'bar',
+    data: {
+      labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+      datasets: [
+        { label: 'Open', data: [45,52,38,61,48,55,43,50,67,58,72,0], backgroundColor: 'rgba(255,107,43,0.6)', borderRadius: 4 },
+        { label: 'Closed', data: [40,48,35,55,44,50,39,47,60,52,65,0], backgroundColor: 'rgba(0,200,255,0.6)', borderRadius: 4 }
+      ]
+    },
+    options: baseChartOptions()
+  });
+}
+
+function renderAnalystRanking() {
+  const analysts = ANALYST_NAMES.slice(0,8).map((name,i) => ({
+    name,
+    cases: rnd(12,48),
+    score: rnd(75,99),
+    color: ['#ffd60a','#c0c0c0','#cd7f32','var(--neon-blue)','var(--neon-green)','var(--neon-purple)','var(--neon-orange)','var(--text-secondary)'][i]
+  })).sort((a,b) => b.score - a.score);
+
+  document.getElementById('analyst-ranking').innerHTML = analysts.map((a,i) => {
+    const initials = a.name.split(' ').map(n=>n[0]).join('');
+    return `<div class="analyst-perf-card">
+      <div class="analyst-rank ${i<3?'top':''}">#${i+1}</div>
+      <div class="analyst-perf-avatar" style="background:linear-gradient(135deg,${a.color},rgba(0,200,255,0.3))">${initials}</div>
+      <div class="analyst-perf-info">
+        <div class="analyst-perf-name">${a.name}</div>
+        <div class="analyst-perf-stat">${a.cases} cases resolved this month</div>
+      </div>
+      <div class="analyst-score">${a.score}%</div>
+    </div>`;
+  }).join('');
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ============================================================
+// ALERTS PAGE
+// ============================================================
+let alertPage = 1;
+const ALERTS_PER_PAGE = 25;
+let filteredAlerts = [...ALERTS];
+let alertFilter = '';
+
+function initAlerts() {
+  filteredAlerts = [...ALERTS];
+  renderAlertsTable();
+  document.querySelectorAll('.alert-filter').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.alert-filter').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      alertFilter = this.dataset.filter;
+      filterAlerts();
+    });
+  });
+}
+
+function filterAlerts() {
+  filteredAlerts = ALERTS.filter(a =>
+    !alertFilter ||
+    a.severity === alertFilter ||
+    a.queueStatus === alertFilter
+  );
+  alertPage = 1;
+  renderAlertsTable();
+}
+
+function renderAlertsTable() {
+  const start = (alertPage-1)*ALERTS_PER_PAGE;
+  const slice = filteredAlerts.slice(start, start+ALERTS_PER_PAGE);
+  document.getElementById('alerts-table-body').innerHTML = slice.map(a => `
+    <tr>
+      <td style="font-family:var(--font-mono);color:var(--neon-blue)">${a.id}</td>
+      <td style="font-size:10px">${timeAgo(a.minsOpen)}</td>
+      <td style="font-family:var(--font-mono);font-size:10px">${a.txId}</td>
+      <td style="color:var(--text-primary)">${a.custName}</td>
+      <td style="font-size:10px">${a.type}</td>
+      <td>${severityBadge(a.severity)}</td>
+      <td style="min-width:110px">${fraudBar(a.score)}</td>
+      <td style="font-size:10px">${a.analyst}</td>
+      <td>${queueBadge(a.queueStatus)}</td>
+      <td style="font-size:10px;color:${a.minsOpen>60?'var(--neon-orange)':'var(--text-secondary)'}">${timeAgo(a.minsOpen)}</td>
+      <td>
+        <div class="action-btns">
+          <button class='action-btn assign' onclick='updateAlert("'+a.id+'","Open")'>Assign</button>
+          <button class='action-btn escalate' onclick='updateAlert("'+a.id+'","Escalated")'>Escalate</button>
+          <button class='action-btn resolve' onclick='updateAlert("'+a.id+'","Resolved")'>Resolve</button>
+          <button class='action-btn block' onclick='updateAlert("'+a.id+'","Investigating")'>Investigate</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+  const total = filteredAlerts.length;
+  document.getElementById('alerts-pagination-info').textContent = `Showing ${start+1}-${Math.min(start+ALERTS_PER_PAGE,total)} of ${total}`;
+  renderPagination('alerts-pagination-btns', alertPage, Math.ceil(total/ALERTS_PER_PAGE), p => { alertPage = p; renderAlertsTable(); });
+}
+
+function queueBadge(s) {
+  const map = { 'New':'badge-green','Open':'badge-blue','Escalated':'badge-orange','Resolved':'badge-gray','Pending':'badge-yellow' };
+  return `<span class="badge ${map[s]||'badge-gray'}">${s}</span>`;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ============================================================
+// ANALYST PAGE
+// ============================================================
+function initAnalyst() {
+  // My cases
+  const myCases = CASES.filter(c => c.analyst.includes('Sarah')||c.analyst.includes('Abadi')).slice(0,8);
+  const fallback = CASES.slice(0,8);
+  const displayCases = myCases.length > 0 ? myCases : fallback;
+  document.getElementById('my-cases-body').innerHTML = displayCases.map(c => `
+    <tr>
+      <td style="font-family:var(--font-mono);color:var(--neon-blue)">${c.id}</td>
+      <td>${c.custId}</td>
+      <td>${priorityBadge(c.priority)}</td>
+      <td style="font-size:10px">${c.fraudType}</td>
+      <td style="font-size:10px;color:${c.slaOverdue?'var(--neon-red)':'var(--text-secondary)'}">${c.sla}</td>
+    </tr>
+  `).join('');
+
+  // Daily tasks
+  const tasks = [
+    { done: true, text: 'Review 5 high-priority alerts' },
+    { done: true, text: 'Update Case CASE-0042 with findings' },
+    { done: false, text: 'Investigate CUST-0187 device mismatch' },
+    { done: false, text: 'Submit weekly fraud summary report' },
+    { done: false, text: 'Review 3 escalated wire transfers' },
+    { done: false, text: 'Team standup at 14:00 UTC' },
+  ];
+  document.getElementById('daily-tasks').innerHTML = tasks.map((t,i) => `
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;margin-bottom:4px;border-radius:7px;background:${t.done?'rgba(0,255,157,0.04)':'rgba(255,255,255,0.02)'};border:1px solid ${t.done?'rgba(0,255,157,0.15)':'var(--border)'};cursor:pointer" onclick="this.style.opacity='0.5'">
+      <div style="width:16px;height:16px;border-radius:4px;${t.done?'background:var(--neon-green);display:flex;align-items:center;justify-content:center':'border:1.5px solid var(--text-dim)'}">
+        ${t.done?'<i class="fas fa-check" style="font-size:8px;color:#000"></i>':''}
+      </div>
+      <span style="font-size:11px;color:${t.done?'var(--text-dim)':'var(--text-primary)'};${t.done?'text-decoration:line-through':''}">${t.text}</span>
+    </div>
+  `).join('');
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ============================================================
+// ADMIN PAGE
+// ============================================================
+function initAdmin() {
+  // Fraud rules
+  const rules = [
+    { name: 'Velocity Check', threshold: 5, active: true, desc: 'Max 5 transactions per hour' },
+    { name: 'Amount Threshold', threshold: 10000, active: true, desc: 'Flag amounts > $10,000' },
+    { name: 'Geo Anomaly', threshold: 2, active: true, desc: 'Flag logins from 2+ countries/day' },
+    { name: 'IP Blacklist', threshold: 0, active: true, desc: 'Block known malicious IPs' },
+    { name: 'Device Mismatch', threshold: 1, active: false, desc: 'Alert on new device login' },
+    { name: 'Night Transaction', threshold: 2300, active: true, desc: 'Flag txns after 23:00 local time' },
+    { name: 'Card Not Present', threshold: 500, active: true, desc: 'Flag CNP > $500' },
+    { name: 'Foreign Card', threshold: 0, active: false, desc: 'Flag international card use' },
+    { name: 'Wire > $5000', threshold: 5000, active: true, desc: 'Manual review for large wires' },
+    { name: 'P2P Threshold', threshold: 1000, active: true, desc: 'Flag P2P transfers > $1000' },
+    { name: 'Failed Login Limit', threshold: 3, active: true, desc: 'Lock after 3 failed logins' },
+    { name: 'ATM Withdrawal Cap', threshold: 800, active: false, desc: 'Flag ATM > $800/day' },
+  ];
+
+  document.getElementById('rules-grid').innerHTML = rules.map((r,i) => `
+    <div class="glass-card rule-card">
+      <button class="rule-toggle ${r.active?'on':'off'}" onclick="this.classList.toggle('on');this.classList.toggle('off')"></button>
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:600;color:var(--text-primary)">${r.name}</div>
+        <div style="font-size:10px;color:var(--text-secondary);margin-top:2px">${r.desc}</div>
+        ${r.threshold > 0 ? `<div style="font-size:10px;color:var(--neon-blue);margin-top:4px;font-family:var(--font-mono)">Threshold: ${r.threshold}</div>` : ''}
+      </div>
+    </div>
+  `).join('');
+
+  // Audit log
+  const logs = [
+    { time: '2m ago', action: 'Rule modified: Amount Threshold â†’ $10,000', user: 'admin' },
+    { time: '14m ago', action: 'Analyst created: Felix Wagner', user: 'admin' },
+    { time: '1h ago', action: 'Threshold updated: Block â†’ 85%', user: 'admin' },
+    { time: '2h ago', action: 'Case CASE-0289 escalated to L2', user: 'sarah.a' },
+    { time: '3h ago', action: 'IP 192.168.1.1 blacklisted', user: 'alex.c' },
+    { time: '5h ago', action: 'Bulk alert assign â€” 12 alerts to team', user: 'admin' },
+  ];
+  document.getElementById('audit-log').innerHTML = logs.map(l => `
+    <div style="padding:7px 0;border-bottom:1px solid var(--border)">
+      <div style="font-size:10px;color:var(--text-primary)">${l.action}</div>
+      <div style="font-size:9px;color:var(--text-dim);margin-top:2px">${l.time} Â· by ${l.user}</div>
+    </div>
+  `).join('');
+
+  // System health
+  const metrics = [
+    { label: 'API Response Time', value: '42ms', ok: true },
+    { label: 'ML Model Accuracy', value: '94.7%', ok: true },
+    { label: 'DB Query Time', value: '8ms', ok: true },
+    { label: 'Queue Depth', value: '487', ok: false },
+    { label: 'Fraud Engine', value: 'ONLINE', ok: true },
+    { label: 'Alert Service', value: 'ONLINE', ok: true },
+  ];
+  document.getElementById('system-health').innerHTML = metrics.map(m => `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:11px;color:var(--text-secondary)">${m.label}</span>
+      <span style="font-size:11px;font-family:var(--font-mono);color:${m.ok?'var(--neon-green)':'var(--neon-orange)'}">${m.value}</span>
+    </div>
+  `).join('');
+
+  // Admin actions
+  const actions = [
+    { icon: 'fa-user-plus', text: 'Analyst created', time: '14m ago', color: 'var(--neon-green)' },
+    { icon: 'fa-sliders-h', text: 'Thresholds updated', time: '1h ago', color: 'var(--neon-blue)' },
+    { icon: 'fa-shield-alt', text: 'Rule engine refresh', time: '2h ago', color: 'var(--neon-purple)' },
+    { icon: 'fa-ban', text: 'IP range blocked', time: '3h ago', color: 'var(--neon-red)' },
+    { icon: 'fa-download', text: 'Report exported', time: '4h ago', color: 'var(--neon-yellow)' },
+  ];
+  document.getElementById('admin-actions').innerHTML = actions.map(a => `
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <div style="width:28px;height:28px;border-radius:7px;background:rgba(${a.color==='var(--neon-green)'?'0,255,157':'0,200,255'},0.1);display:flex;align-items:center;justify-content:center;color:${a.color}">
+        <i class="fas ${a.icon}" style="font-size:11px"></i>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--text-primary)">${a.text}</div>
+        <div style="font-size:9px;color:var(--text-dim)">${a.time}</div>
+      </div>
+    </div>
+  `).join('');
+
+  // Model perf chart
+  destroyChart('model-perf');
+  const ctx = document.getElementById('chart-model-perf').getContext('2d');
+  chartInstances['model-perf'] = new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: ['Precision','Recall','F1 Score','AUC-ROC','Specificity','Accuracy'],
+      datasets: [{
+        label: 'Model v4.2',
+        data: [94.7, 89.3, 91.9, 96.2, 97.1, 94.7],
+        borderColor: 'rgba(0,200,255,0.8)',
+        backgroundColor: 'rgba(0,200,255,0.1)',
+        pointBackgroundColor: 'rgba(0,200,255,0.8)',
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        r: {
+          grid: { color: CHART_DEFAULTS.gridColor },
+          angleLines: { color: CHART_DEFAULTS.gridColor },
+          ticks: { color: CHART_DEFAULTS.color, font: { family: CHART_DEFAULTS.fontFamily, size: 8 }, stepSize: 20 },
+          pointLabels: { color: CHART_DEFAULTS.color, font: { family: CHART_DEFAULTS.fontFamily, size: 9 } },
+          min: 70, max: 100
+        }
+      },
+      plugins: {
+        legend: { labels: { color: CHART_DEFAULTS.color, font: { family: CHART_DEFAULTS.fontFamily, size: 10 } } },
+        tooltip: {
+          backgroundColor: 'rgba(4,8,20,0.95)',
+          borderColor: 'rgba(0,200,255,0.3)',
+          borderWidth: 1,
+          bodyFont: { family: CHART_DEFAULTS.fontFamily, size: 11 }
+        }
+      }
+    }
+  });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ============================================================
+// REAL-TIME SIMULATION
+// ============================================================
+let updateCounter = 0;
+
+function liveUpdate() {
+  updateCounter++;
+  const now = new Date();
+  document.getElementById('last-update').textContent = 'UPDATED ' + now.toLocaleTimeString('en-US',{hour12:false});
+
+  // Randomly bump KPI counters
+  if(Math.random() > 0.7) {
+    const el = document.getElementById('kpi-open-alerts');
+    if(el) { el.textContent = parseInt(el.textContent) + rnd(0,2); }
+    const alertCount = document.getElementById('alert-open-count');
+    if(alertCount) alertCount.textContent = parseInt(alertCount.textContent||487) + rnd(0,2);
+  }
+
+  // Random fraud notification
+  if(updateCounter % 4 === 0 && Math.random() > 0.5) {
+    spawnNotification();
+  }
+}
+
+const NOTIF_MSGS = [
+  ['ðŸ”´ CRITICAL ALERT', 'Account takeover detected on CUST-{id}. Score: {score}%'],
+  ['âš  HIGH RISK', 'Unusual wire transfer flagged: ${amt} to foreign account'],
+  ['ðŸš¨ VELOCITY BREACH', 'CUST-{id} exceeded 5 transactions in 10 minutes'],
+  ['ðŸ”’ ACCOUNT BLOCKED', 'Account {acc} auto-blocked â€” ML fraud score {score}%'],
+];
+
+function spawnNotification() {
+  const popup = document.getElementById('notification-popup');
+  const msg = NOTIF_MSGS[rnd(0,NOTIF_MSGS.length-1)];
+  const div = document.createElement('div');
+  div.className = 'notif-item';
+  div.innerHTML = `
+    <div class="notif-title"><i class="fas fa-exclamation-triangle"></i> ${msg[0]}</div>
+    <div class="notif-body">${msg[1].replace('{id}', rnd(1,9999)).replace('{score}', rnd(85,99)).replace('${amt}','$'+rnd(5000,50000).toLocaleString()).replace('{acc}','****'+rnd(1000,9999))}</div>
+    <div class="notif-time">Just now</div>
+  `;
+  popup.appendChild(div);
+  setTimeout(() => { div.style.opacity='0'; div.style.transition='opacity 0.5s'; setTimeout(()=>div.remove(),500); }, 5000);
+  while(popup.children.length > 3) popup.removeChild(popup.firstChild);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ============================================================
+// MYSQL INTEGRATION 
+// ============================================================
+function setCurrentUser(user) {
+  CURRENT_USER = user || null;
+  const name = CURRENT_USER?.name || 'Not signed in';
+  const role = CURRENT_USER?.role ? CURRENT_USER.role.charAt(0).toUpperCase() + CURRENT_USER.role.slice(1) : 'Guest';
+  const initials = name.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase() || 'GU';
+  document.querySelector('.analyst-avatar').textContent = initials;
+  document.querySelector('.analyst-name').textContent = name;
+  document.querySelector('.analyst-role').textContent = role + (CURRENT_USER ? ' · Online' : '');
+  document.getElementById('profile-name').textContent = name;
+  document.getElementById('profile-role').textContent = role;
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if(n.getAttribute('onclick')?.includes("'admin'")) n.style.display = CURRENT_USER?.role === 'admin' ? 'flex' : 'none';
+  });
+}
+
+function showLoginScreen(message='') {
+  document.getElementById('loginScreen').style.display = 'flex';
+  showLogin();
+  if(message) {
+    const err = document.getElementById('loginError');
+    err.style.display = 'flex';
+    err.innerHTML = '<i class="fas fa-lock"></i> ' + message;
+  }
+}
+
+function toggleProfileMenu() {
+  const menu = document.getElementById('profile-menu');
+  menu.style.display = menu.style.display === 'none' || !menu.style.display ? 'block' : 'none';
+}
+
+async function loginUser(){
+  const email = document.getElementById("loginEmail").value.trim();
+  const pass = document.getElementById("loginPassword").value;
+  const errEl = document.getElementById("loginError");
+  errEl.style.display = "none";
+  if(!email || !pass) {
+    errEl.style.display = "flex";
+    errEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Please fill in all fields';
+    return;
+  }
+  try {
+    const data = await postForm('login', { email, password: pass });
+    if(data.success) {
+      setCurrentUser(data);
+      document.getElementById("loginScreen").style.display = "none";
+      document.getElementById('profile-menu').style.display = 'none';
+      toast('Signed in as ' + data.name);
+      showPage(data.role === 'admin' && ACTIVE_PAGE === 'admin' ? 'admin' : 'dashboard');
+    } else {
+      throw new Error(data.error || 'Invalid credentials');
+    }
+  } catch(err) {
+    errEl.style.display = "flex";
+    errEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + err.message;
+  }
+}
+
+async function signupUser(){
+  const name  = document.getElementById("signupName").value.trim();
+  const email = document.getElementById("signupEmail").value.trim();
+  const pass  = document.getElementById("signupPass").value;
+  const pass2 = document.getElementById("signupPass2").value;
+  const errEl = document.getElementById("signupError");
+  const errTxt= document.getElementById("signupErrorText");
+  errEl.style.display = "none";
+  const showErr = msg => { errTxt.textContent = msg; errEl.style.display = "flex"; };
+  if(!name || !email || !pass || !pass2) return showErr("All fields are required");
+  if(pass !== pass2) return showErr("Passwords do not match");
+  try {
+    const data = await postForm('signup', { name, email, password: pass });
+    if(!data.success) throw new Error(data.error || 'Signup failed');
+    showLogin();
+    document.getElementById("loginEmail").value = email;
+    toast('Analyst account created. Admin panel will show the new analyst.');
+  } catch(err) {
+    showErr(err.message);
+  }
+}
+
+async function logoutUser() {
+  await api('logout');
+  setCurrentUser(null);
+  document.getElementById('profile-menu').style.display = 'none';
+  showLoginScreen('You have been logged out');
+}
+
+async function restoreSession() {
+  try {
+    const data = await api('session');
+    setCurrentUser(data.user);
+    if(data.user) document.getElementById('loginScreen').style.display = 'none';
+  } catch(e) {
+    setCurrentUser(null);
+  }
+}
+
+async function loadDashboardStats() {
+  DASHBOARD_STATS = await api('stats');
+  DASHBOARD_CHARTS = await api('charts');
+  updateDashboardKpis();
+}
+
+function moneyShort(value) {
+  value = parseFloat(value || 0);
+  if(value >= 1000000) return (value/1000000).toFixed(1) + 'M';
+  if(value >= 1000) return (value/1000).toFixed(0) + 'K';
+  return value.toFixed(0);
+}
+
+function updateDashboardKpis() {
+  const set = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
+  set('kpi-fraud-rate', (DASHBOARD_STATS.fraud_rate || 0).toFixed ? DASHBOARD_STATS.fraud_rate.toFixed(2) : DASHBOARD_STATS.fraud_rate || '0.00');
+  set('kpi-open-alerts', DASHBOARD_STATS.alerts_open || 0);
+  set('kpi-volume', moneyShort(DASHBOARD_STATS.tx_vol));
+  set('kpi-losses', moneyShort(DASHBOARD_STATS.cases_fraud_amt));
+  set('kpi-block-rate', DASHBOARD_STATS.block_rate || 0);
+  set('kpi-confirmed', DASHBOARD_STATS.cases_total || 0);
+  set('kpi-pending', DASHBOARD_STATS.cases_open || 0);
+  set('kpi-recovery', moneyShort(DASHBOARD_STATS.cases_recovered));
+  set('alert-open-count', DASHBOARD_STATS.alerts_open || 0);
+  const alertCards = document.querySelectorAll('#page-alerts .kpi-value');
+  if(alertCards[1]) alertCards[1].textContent = DASHBOARD_STATS.alerts_critical || 0;
+  if(alertCards[3]) alertCards[3].textContent = DASHBOARD_STATS.escalated_today || 0;
+  const caseCards = document.querySelectorAll('#page-cases .kpi-value');
+  if(caseCards[0]) caseCards[0].textContent = DASHBOARD_STATS.cases_open || 0;
+  if(caseCards[1]) caseCards[1].textContent = DASHBOARD_STATS.closed_today || 0;
+  if(caseCards[3]) caseCards[3].textContent = '$' + moneyShort(DASHBOARD_STATS.cases_recovered);
+}
+
+function showPage(id) {
+  if(id === 'admin' && (!CURRENT_USER || CURRENT_USER.role !== 'admin')) {
+    ACTIVE_PAGE = 'admin';
+    toast('Admin login required', false);
+    showLoginScreen('Admin access requires an admin account');
+    return;
+  }
+  ACTIVE_PAGE = id;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.getElementById('topbar-title').textContent = PAGE_TITLES[id];
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if(n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + id + "'")) n.classList.add('active');
+  });
+  const initializers = { dashboard: initDashboard, transactions: initTransactions, cases: initCases, alerts: initAlerts, analyst: initAnalyst, admin: initAdmin };
+  if(initializers[id]) initializers[id]();
+}
+
+function renderEmptyRow(id, colspan, message) {
+  const el = document.getElementById(id);
+  if(el) el.innerHTML = `<tr><td colspan="${colspan}" style="text-align:center;color:var(--text-secondary);padding:22px">${message}</td></tr>`;
+}
+
+async function initDashboard() {
+  try {
+    await loadDashboardStats();
+    await renderHighRiskTable();
+    initFraudTypeChart();
+    initDailyTrendChart();
+    initLossRecoveryChart();
+    initByChannelChart();
+  } catch (err) { toast(err.message, false); }
+}
+
+async function renderHighRiskTable() {
+  const data = await api('transactions', { page: 1, limit: 12, minScore: 75 });
+  TRANSACTIONS.splice(0, TRANSACTIONS.length, ...data.data.map(normalizeTransaction));
+  const tbody = document.getElementById('dash-tx-body');
+  if(!TRANSACTIONS.length) return renderEmptyRow('dash-tx-body', 7, 'No high-risk transactions in MySQL yet.');
+  tbody.innerHTML = TRANSACTIONS.map(t => `
+    <tr class="${t.score >= 85 ? 'high-risk glow-row' : ''}">
+      <td><span class="tx-id" style="font-family:var(--font-mono)">${t.id}</span></td>
+      <td style="color:var(--text-primary)">${t.custName}</td>
+      <td><span class="badge badge-blue">${t.method}</span></td>
+      <td style="color:var(--neon-blue);font-family:var(--font-mono)">$${parseFloat(t.amount).toLocaleString()}</td>
+      <td>${fraudBar(t.score)}</td>
+      <td style="color:var(--text-dim);font-size:10px">${fmtDate(t.dt)}</td>
+      <td>${statusBadge(t.status)}</td>
+    </tr>`).join('');
+}
+
+function chartValues(items, labels) {
+  return labels.map(label => Number((items || []).find(x => x.label === label)?.value || 0));
+}
+
+function initFraudTypeChart() {
+  destroyChart('fraud-type');
+  const ctx = document.getElementById('chart-fraud-type').getContext('2d');
+  chartInstances['fraud-type'] = new Chart(ctx, { type: 'doughnut', data: { labels: FRAUD_TYPES, datasets: [{ data: chartValues(DASHBOARD_CHARTS.fraud_types, FRAUD_TYPES), backgroundColor: ['rgba(255,45,85,0.8)','rgba(0,200,255,0.8)','rgba(191,90,242,0.8)','rgba(255,107,43,0.8)','rgba(0,255,157,0.8)','rgba(255,214,10,0.8)','rgba(100,200,255,0.8)','rgba(255,100,150,0.8)'], borderColor: 'rgba(4,8,20,0.5)', borderWidth: 2, hoverOffset: 8 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'right', labels: { color: CHART_DEFAULTS.color, font: { family: CHART_DEFAULTS.fontFamily, size: 9 }, boxWidth: 8, padding: 8 } } } } });
+}
+
+function initDailyTrendChart() {
+  destroyChart('daily-trend');
+  const rows = DASHBOARD_CHARTS.daily_trend || [];
+  const labels = rows.map(r => new Date(r.day).toLocaleDateString('en-US',{month:'short',day:'2-digit'}));
+  const txData = rows.map(r => Number(r.tx_count || 0));
+  const fraudData = rows.map(r => Number(r.fraud_count || 0));
+  chartInstances['daily-trend'] = new Chart(document.getElementById('chart-daily-trend').getContext('2d'), { type: 'line', data: { labels, datasets: [{ label: 'Total Transactions', data: txData, borderColor: 'rgba(0,200,255,0.8)', backgroundColor: 'rgba(0,200,255,0.06)', fill: true, tension: 0.4, pointRadius: 0, borderWidth: 2 }, { label: 'Fraud Events', data: fraudData, borderColor: 'rgba(255,45,85,0.9)', backgroundColor: 'rgba(255,45,85,0.08)', fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2, yAxisID: 'y1' }] }, options: { ...baseChartOptions(), scales: { x: { grid: { color: CHART_DEFAULTS.gridColor }, ticks: { color: CHART_DEFAULTS.color, font: { family: CHART_DEFAULTS.fontFamily, size: 9 }, maxTicksLimit: 8 } }, y: { grid: { color: CHART_DEFAULTS.gridColor }, ticks: { color: CHART_DEFAULTS.color, font: { family: CHART_DEFAULTS.fontFamily, size: 9 } } }, y1: { position: 'right', grid: { display: false }, ticks: { color: 'rgba(255,45,85,0.7)', font: { family: CHART_DEFAULTS.fontFamily, size: 9 } } } } } });
+}
+
+function initLossRecoveryChart() {
+  destroyChart('loss-recovery');
+  const rows = DASHBOARD_CHARTS.loss_recovery || [];
+  chartInstances['loss-recovery'] = new Chart(document.getElementById('chart-loss-recovery').getContext('2d'), { type: 'bar', data: { labels: rows.map(r=>r.label), datasets: [{ label: 'Fraud Losses ($K)', data: rows.map(r=>Number(r.losses||0)), backgroundColor: 'rgba(255,45,85,0.65)', borderRadius: 4 }, { label: 'Recoveries ($K)', data: rows.map(r=>Number(r.recovered||0)), backgroundColor: 'rgba(0,255,157,0.65)', borderRadius: 4 }] }, options: baseChartOptions() });
+}
+
+function initByChannelChart() {
+  destroyChart('by-channel');
+  chartInstances['by-channel'] = new Chart(document.getElementById('chart-by-channel').getContext('2d'), { type: 'bar', data: { labels: METHODS, datasets: [{ label: 'Fraud Events', data: chartValues(DASHBOARD_CHARTS.by_channel, METHODS), backgroundColor: ['rgba(0,200,255,0.7)','rgba(255,45,85,0.7)','rgba(0,255,157,0.7)','rgba(191,90,242,0.7)','rgba(255,107,43,0.7)','rgba(255,214,10,0.7)','rgba(100,180,255,0.7)','rgba(255,100,180,0.7)'], borderRadius: 5 }] }, options: { ...baseChartOptions(), plugins: { legend: { display: false } } } });
+}
+
+txPage = 1;
+let txTotalPages = 1;
+async function initTransactions() { txPage = 1; await loadTransactions(); }
+function txParams() { return { page: txPage, limit: TX_PER_PAGE, search: (document.getElementById('tx-search-id').value || document.getElementById('tx-search-name').value || '').trim(), method: document.getElementById('tx-filter-method').value, risk: document.getElementById('tx-filter-risk').value, status: document.getElementById('tx-filter-status').value, minScore: document.getElementById('tx-filter-minscore').value }; }
+async function filterTx() { txPage = 1; await loadTransactions(); }
+async function loadTransactions() {
+  const result = await api('transactions', txParams());
+  filteredTx = result.data.map(normalizeTransaction);
+  txTotalPages = result.pages || 1;
+  renderTxTable(result.total || 0);
+}
+function renderTxTable(totalOverride) {
+  const rows = filteredTx || [];
+  if(!rows.length) renderEmptyRow('tx-table-body', 12, 'No transactions match the database filters.');
+  else document.getElementById('tx-table-body').innerHTML = rows.map(t => `<tr class="${t.score >= 75 ? 'high-risk' : ''}"><td><span style="font-family:var(--font-mono);color:${t.score>=75?'var(--neon-red)':'var(--neon-blue)'}">${t.id}</span></td><td style="font-size:10px">${fmtDate(t.dt)}</td><td style="color:var(--text-primary)">${t.custName}</td><td style="font-family:var(--font-mono);font-size:10px">${t.account}</td><td><span class="badge badge-blue">${t.method}</span></td><td>${t.merchant}</td><td style="font-size:10px">${t.location}</td><td style="font-size:10px">${(t.device||'').substring(0,14)}</td><td style="font-family:var(--font-mono);color:var(--neon-blue)">$${parseFloat(t.amount).toLocaleString()}</td><td style="min-width:130px">${fraudBar(t.score)}</td><td>${priorityBadge(t.risk)}</td><td>${statusBadge(t.status)}</td></tr>`).join('');
+  const total = totalOverride ?? rows.length;
+  const start = total ? (txPage-1)*TX_PER_PAGE + 1 : 0;
+  document.getElementById('tx-pagination-info').textContent = `Showing ${start}-${Math.min(txPage*TX_PER_PAGE,total)} of ${Number(total).toLocaleString()}`;
+  renderDbPagination('tx-pagination-btns', txPage, txTotalPages, async p => { txPage = p; await loadTransactions(); });
+}
+
+function renderDbPagination(id, current, total, cb) {
+  const el = document.getElementById(id); let html = '';
+  if(current > 1) html += `<button class="page-btn" data-page="${current-1}"><i class="fas fa-chevron-left"></i></button>`;
+  for(let i=Math.max(1,current-3); i<=Math.min(total, Math.max(1,current-3)+6); i++) html += `<button class="page-btn ${i===current?'active':''}" data-page="${i}">${i}</button>`;
+  if(current < total) html += `<button class="page-btn" data-page="${current+1}"><i class="fas fa-chevron-right"></i></button>`;
+  el.innerHTML = html;
+  el.querySelectorAll('[data-page]').forEach(btn => btn.addEventListener('click', () => cb(parseInt(btn.dataset.page,10))));
+}
+
+async function searchCustomer(mode) {
+  const q = mode === 'random' ? 'random' : document.getElementById('cust-search-input').value.trim();
+  if(!q) return;
+  const result = await api('customer', { q });
+  if(!result.data && !result.customer) return toast('Customer not found in database', false);
+  document.getElementById('cust-search-input').value = result.customer.custId;
+  renderInvestigation(result.customer.custName, result.customer.custId, result.transactions.map(normalizeTransaction), result);
+}
+
+function renderInvestigation(name, id, txList, db = {}) {
+  document.getElementById('cust-results').style.display = 'block';
+  const initials = name.split(' ').map(n=>n[0]).join('').substring(0,2);
+  const avgScore = txList.reduce((a,b)=>a+b.score,0)/(txList.length||1);
+  const riskRating = avgScore >= 70 ? 'HIGH' : avgScore >= 40 ? 'MEDIUM' : 'LOW';
+  const riskColor = avgScore >= 70 ? 'var(--neon-red)' : avgScore >= 40 ? 'var(--neon-orange)' : 'var(--neon-green)';
+  document.getElementById('cust-summary-card').innerHTML = `<div class="cust-avatar-lg" style="background:linear-gradient(135deg,var(--neon-blue),var(--neon-purple))">${initials}</div><div><div style="font-family:var(--font-display);font-size:18px;font-weight:800;color:var(--text-primary)">${name}</div><div style="font-size:12px;color:var(--text-secondary);margin-top:4px">${id}</div><div style="margin-top:12px;padding:6px 12px;border:1px solid var(--border-bright);border-radius:6px;font-size:11px;color:${riskColor};display:inline-block">RISK: ${riskRating}</div></div><div><div class="cust-detail-item"><div class="cust-detail-label">Total Transactions</div><div class="cust-detail-value">${txList.length}</div></div><div class="cust-detail-item"><div class="cust-detail-label">Total Volume</div><div class="cust-detail-value">$${txList.reduce((a,b)=>a+parseFloat(b.amount),0).toLocaleString('en-US',{maximumFractionDigits:0})}</div></div><div class="cust-detail-item"><div class="cust-detail-label">Last Transaction</div><div class="cust-detail-value">${txList[0]?fmtDate(txList[0].dt):'None'}</div></div></div><div><div class="cust-detail-item"><div class="cust-detail-label">Registered Device</div><div class="cust-detail-value">${txList[0]?.device||'Unknown'}</div></div><div class="cust-detail-item"><div class="cust-detail-label">Current Case</div><div class="cust-detail-value">${db.customer?.current_case||'None Active'}</div></div><div class="cust-detail-item"><div class="cust-detail-label">Avg Fraud Score</div><div class="cust-detail-value" style="color:${riskColor}">${avgScore.toFixed(1)}%</div></div></div>`;
+  document.getElementById('cust-timeline').innerHTML = (db.timeline||[]).map(e => `<div class="timeline-item"><div class="timeline-dot ${e.score>=75?'red':e.score>=45?'yellow':'green'}"></div><div class="timeline-time">${fmtDate(e.dt)}</div><div class="timeline-event">${e.method} ${e.status}</div><div class="timeline-desc">${e.id} - $${parseFloat(e.amount).toLocaleString()} at ${e.merchant}</div></div>`).join('');
+  const heat = Array(24).fill(0); (db.heatmap||[]).forEach(h => heat[parseInt(h.hr,10)] = parseInt(h.value,10)); const maxH = Math.max(...heat,1);
+  document.getElementById('heatmap-grid').innerHTML = heat.map((v,i)=>{ const intensity=v/maxH; return `<div class="heat-cell" style="background:rgba(${Math.round(255*intensity)},${Math.round(180*(1-intensity))},120,${0.18+intensity*0.65})" title="${String(i).padStart(2,'0')}:00 - ${v} events"></div>`; }).join('');
+  document.getElementById('cust-tx-body').innerHTML = txList.map(t => `<tr><td style="font-size:10px">${fmtDate(t.dt)}</td><td style="font-family:var(--font-mono);color:var(--neon-blue)">${t.id}</td><td><span class="badge badge-blue">${t.method}</span></td><td>${t.merchant}</td><td style="font-family:var(--font-mono)">$${parseFloat(t.amount).toLocaleString()}</td><td style="min-width:130px">${fraudBar(t.score)}</td><td>${statusBadge(t.status)}</td></tr>`).join('');
+  if(riskTrendChart) riskTrendChart.destroy();
+  const trend = db.trend || [];
+  riskTrendChart = new Chart(document.getElementById('chart-risk-trend').getContext('2d'), { type: 'line', data: { labels: trend.map(r=>new Date(r.day).toLocaleDateString('en-US',{month:'short',day:'2-digit'})), datasets: [{ label: 'Fraud Score %', data: trend.map(r=>Number(r.score||0)), borderColor: 'rgba(255,45,85,0.8)', backgroundColor: 'rgba(255,45,85,0.08)', fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2 }] }, options: { ...baseChartOptions(), scales: { y: { min:0, max:100, grid:{color:CHART_DEFAULTS.gridColor}, ticks:{color:CHART_DEFAULTS.color,font:{family:CHART_DEFAULTS.fontFamily,size:9}} } } } });
+}
+
+casePage = 1;
+let caseTotalPages = 1;
+async function initCases() { casePage = 1; await loadCases(); await initCasesCharts(); renderAnalystRanking(); }
+async function filterCases() { casePage = 1; await loadCases(); }
+async function loadCases() { const r = await api('cases', { page: casePage, search: document.getElementById('case-search').value, status: document.getElementById('case-filter-status').value, priority: document.getElementById('case-filter-priority').value }); filteredCases = r.data.map(normalizeCase); caseTotalPages = r.pages || 1; renderCasesTable(r.total || 0); }
+function renderCasesTable(totalOverride) { const rows = filteredCases || []; if(!rows.length) renderEmptyRow('cases-table-body', 12, 'No cases match the database filters.'); else document.getElementById('cases-table-body').innerHTML = rows.map(c => `<tr><td style="font-family:var(--font-mono);color:var(--neon-blue)">${c.id}</td><td style="color:var(--text-secondary)">${c.custId}</td><td style="font-family:var(--font-mono);font-size:10px">${c.txId}</td><td style="font-size:10px">${c.opened}</td><td>${caseStatusBadge(c.status)}</td><td>${priorityBadge(c.priority)}</td><td style="font-size:10px">${c.fraudType}</td><td style="font-family:var(--font-mono);color:var(--neon-red)">$${parseFloat(c.fraudAmt).toLocaleString()}</td><td style="font-size:10px">${c.analyst}</td><td>${resolutionBadge(c.resolution)}</td><td style="font-family:var(--font-mono);color:var(--neon-green)">$${parseFloat(c.recoveredAmt).toLocaleString()}</td><td><span style="font-size:10px;color:${c.slaOverdue?'var(--neon-red)':'var(--text-secondary)'}">${c.sla}${c.slaOverdue?' !':''}</span></td></tr>`).join(''); const total=totalOverride??rows.length; const start=total?(casePage-1)*CASES_PER_PAGE+1:0; document.getElementById('cases-pagination-info').textContent=`Showing ${start}-${Math.min(casePage*CASES_PER_PAGE,total)} of ${total}`; renderDbPagination('cases-pagination-btns', casePage, caseTotalPages, async p=>{casePage=p; await loadCases();}); }
+
+async function initCasesCharts() { if(!DASHBOARD_CHARTS.cases_weekly) DASHBOARD_CHARTS = await api('charts'); destroyChart('cases-weekly'); const weekly=DASHBOARD_CHARTS.cases_weekly||[]; chartInstances['cases-weekly']=new Chart(document.getElementById('chart-cases-weekly').getContext('2d'),{type:'bar',data:{labels:weekly.map(r=>r.label),datasets:[{label:'Opened',data:weekly.map(r=>Number(r.opened||0)),backgroundColor:'rgba(255,107,43,0.65)',borderRadius:4},{label:'Resolved',data:weekly.map(r=>Number(r.resolved||0)),backgroundColor:'rgba(0,255,157,0.65)',borderRadius:4}]},options:baseChartOptions()}); destroyChart('recovery-rate'); const rr=DASHBOARD_CHARTS.recovery_rate||[]; chartInstances['recovery-rate']=new Chart(document.getElementById('chart-recovery-rate').getContext('2d'),{type:'line',data:{labels:rr.map(r=>r.label),datasets:[{label:'Recovery Rate %',data:rr.map(r=>Number(r.value||0)),borderColor:'rgba(0,255,157,0.8)',backgroundColor:'rgba(0,255,157,0.08)',fill:true,tension:0.4,pointRadius:3,borderWidth:2}]},options:{...baseChartOptions(),scales:{y:{max:100,grid:{color:CHART_DEFAULTS.gridColor},ticks:{color:CHART_DEFAULTS.color,font:{family:CHART_DEFAULTS.fontFamily,size:9}}}}}}); destroyChart('cases-monthly'); const mo=DASHBOARD_CHARTS.cases_monthly||[]; chartInstances['cases-monthly']=new Chart(document.getElementById('chart-cases-monthly').getContext('2d'),{type:'bar',data:{labels:mo.map(r=>r.label),datasets:[{label:'Open',data:mo.map(r=>Number(r.opened||0)),backgroundColor:'rgba(255,107,43,0.6)',borderRadius:4},{label:'Closed',data:mo.map(r=>Number(r.closed||0)),backgroundColor:'rgba(0,200,255,0.6)',borderRadius:4}]},options:baseChartOptions()}); }
+function renderAnalystRanking() { const analysts=(DASHBOARD_CHARTS.analysts||[]); document.getElementById('analyst-ranking').innerHTML = analysts.map((a,i)=>{ const initials=a.name.split(' ').map(n=>n[0]).join(''); return `<div class="analyst-perf-card"><div class="analyst-rank ${i<3?'top':''}">#${i+1}</div><div class="analyst-perf-avatar" style="background:linear-gradient(135deg,var(--neon-blue),rgba(0,200,255,0.3))">${initials}</div><div class="analyst-perf-info"><div class="analyst-perf-name">${a.name}</div><div class="analyst-perf-stat">${a.cases} cases resolved this month</div></div><div class="analyst-score">${a.score}%</div></div>`; }).join(''); }
+
+alertPage = 1;
+let alertTotalPages = 1;
+alertFilter = '';
+async function initAlerts() { alertPage = 1; await loadAlerts(); document.querySelectorAll('.alert-filter').forEach(btn => { btn.onclick = async function(){ document.querySelectorAll('.alert-filter').forEach(b=>b.classList.remove('active')); this.classList.add('active'); alertFilter=this.dataset.filter; await filterAlerts(); }; }); }
+async function filterAlerts() { alertPage = 1; await loadAlerts(); }
+async function loadAlerts() { const r = await api('alerts', { page: alertPage, filter: alertFilter }); filteredAlerts = r.data.map(normalizeAlert); alertTotalPages = r.pages || 1; renderAlertsTable(r.total || 0); }
+function renderAlertsTable(totalOverride) { const rows=filteredAlerts||[]; if(!rows.length) renderEmptyRow('alerts-table-body',11,'No alerts match the database filters.'); else document.getElementById('alerts-table-body').innerHTML = rows.map(a => `<tr><td style="font-family:var(--font-mono);color:var(--neon-blue)">${a.id}</td><td style="font-size:10px">${timeAgo(a.minsOpen)}</td><td style="font-family:var(--font-mono);font-size:10px">${a.txId}</td><td style="color:var(--text-primary)">${a.custName}</td><td style="font-size:10px">${a.type}</td><td>${severityBadge(a.severity)}</td><td style="min-width:110px">${fraudBar(a.score)}</td><td style="font-size:10px">${a.analyst}</td><td>${queueBadge(a.queueStatus)}</td><td style="font-size:10px;color:${a.minsOpen>60?'var(--neon-orange)':'var(--text-secondary)'}">${timeAgo(a.minsOpen)}</td><td><div class="action-btns"><button class='action-btn assign' onclick='updateAlert("${a.id}","Open")'>Assign</button><button class='action-btn escalate' onclick='updateAlert("${a.id}","Escalated")'>Escalate</button><button class='action-btn resolve' onclick='updateAlert("${a.id}","Resolved")'>Resolve</button><button class='action-btn block' onclick='updateAlert("${a.id}","Investigating")'>Investigate</button></div></td></tr>`).join(''); const total=totalOverride??rows.length; const start=total?(alertPage-1)*ALERTS_PER_PAGE+1:0; document.getElementById('alerts-pagination-info').textContent=`Showing ${start}-${Math.min(alertPage*ALERTS_PER_PAGE,total)} of ${total}`; renderDbPagination('alerts-pagination-btns',alertPage,alertTotalPages,async p=>{alertPage=p; await loadAlerts();}); }
+async function updateAlert(alertId, newStatus) { await postForm('update_alert', { id: alertId, status: newStatus }); toast('Alert ' + alertId + ' saved to database'); await loadAlerts(); await loadDashboardStats(); }
+
+async function initAnalyst() {
+  const r = await api('analyst');
+  const cases = (r.cases || []).map(normalizeCase);
+  document.getElementById('my-cases-body').innerHTML = cases.length
+    ? cases.map(c => `<tr><td style="font-family:var(--font-mono);color:var(--neon-blue)">${c.id}</td><td>${c.custId}</td><td>${priorityBadge(c.priority)}</td><td style="font-size:10px">${c.fraudType}</td><td style="font-size:10px;color:${c.slaOverdue?'var(--neon-red)':'var(--text-secondary)'}">${c.sla}</td></tr>`).join('')
+    : '<tr><td colspan="5" style="text-align:center;color:var(--text-secondary);padding:18px">No cases assigned to this analyst.</td></tr>';
+  document.getElementById('daily-tasks').innerHTML = (r.tasks || []).map(t => `<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;margin-bottom:4px;border-radius:7px;background:${t.status==='Done'?'rgba(0,255,157,0.04)':'rgba(255,255,255,0.02)'};border:1px solid var(--border)"><button class="action-btn assign" onclick="updateTaskStatus(${t.id},'In Progress')">Start</button><button class="action-btn resolve" onclick="updateTaskStatus(${t.id},'Done')">Done</button><span style="font-size:11px;color:var(--text-primary);flex:1">${t.text}${t.case_id ? ' · ' + t.case_id : ''}</span><span class="badge ${t.status==='Done'?'badge-green':t.status==='In Progress'?'badge-yellow':'badge-blue'}">${t.status}</span></div>`).join('') || '<div style="font-size:11px;color:var(--text-secondary)">No tasks assigned yet.</div>';
+}
+
+async function updateTaskStatus(id, status) {
+  await postForm('update_task', { id, status });
+  toast('Task updated');
+  await initAnalyst();
+}
+
+async function assignTaskToAnalyst() {
+  const analyst_id = document.getElementById('task-analyst-select').value;
+  const case_id = document.getElementById('task-case-id').value.trim();
+  const title = document.getElementById('task-title').value.trim();
+  if(!analyst_id || !title) return toast('Choose analyst and enter a task title', false);
+  await postForm('assign_task', { analyst_id, case_id, title, details: title });
+  document.getElementById('task-title').value = '';
+  toast('Task assigned to analyst');
+  await initAdmin();
+}
+async function initAdmin() {
+  ADMIN_DATA = await api('admin');
+  const settings = Object.fromEntries((ADMIN_DATA.settings || []).map(s => [s.setting_key, s.setting_value]));
+  document.getElementById('admin-analysts-list').innerHTML = (ADMIN_DATA.analysts || []).map(a => `<div style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:8px"><div><div style="font-size:11px;color:var(--text-primary);font-weight:700">${a.full_name}</div><div style="font-size:9px;color:var(--text-secondary)">${a.email}</div><div style="font-size:9px;color:var(--text-dim)">Joined ${fmtDate(a.created_at)}</div></div><span class="badge badge-blue">${a.status}</span></div>`).join('') || '<div style="font-size:11px;color:var(--text-secondary)">No analysts yet.</div>';
+  document.getElementById('task-analyst-select').innerHTML = (ADMIN_DATA.analysts || []).map(a => `<option value="${a.id}">${a.full_name} - ${a.email}</option>`).join('');
+  document.getElementById('assigned-tasks-list').innerHTML = (ADMIN_DATA.tasks || []).map(t => `<div style="padding:8px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:10px"><div><div style="font-size:11px;color:var(--text-primary);font-weight:700">${t.title}</div><div style="font-size:9px;color:var(--text-secondary)">${t.analyst_name}${t.case_id ? ' · ' + t.case_id : ''}</div></div><span class="badge ${t.status==='Done'?'badge-green':t.status==='In Progress'?'badge-yellow':'badge-blue'}">${t.status}</span></div>`).join('') || '<div style="font-size:11px;color:var(--text-secondary)">No assigned tasks yet.</div>';
+  document.querySelectorAll('#page-admin input[type="range"]').forEach(input => {
+    const labelText = input.parentElement.querySelector('span:first-child').textContent.toLowerCase();
+    const key = labelText.split(' ')[0] + '_threshold';
+    if(settings[key]) {
+      input.value = settings[key];
+      input.nextElementSibling.textContent = settings[key] + '%';
+    }
+    input.oninput = () => { input.nextElementSibling.textContent = input.value + '%'; };
+    input.onchange = async () => { await postForm('update_setting', { key, value: input.value }); toast('Setting saved to database'); };
+  });
+
+  document.getElementById('rules-grid').innerHTML = (ADMIN_DATA.rules || []).map(r => {
+    const thresholdInput = parseFloat(r.threshold) > 0
+      ? `<input class="filter-input" style="margin-top:6px;width:110px" type="number" value="${r.threshold}" data-rule-threshold="${r.id}">`
+      : '';
+    return `<div class="glass-card rule-card"><button class="rule-toggle ${parseInt(r.active) ? 'on' : 'off'}" data-id="${r.id}" data-threshold="${r.threshold}"></button><div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--text-primary)">${r.name}</div><div style="font-size:10px;color:var(--text-secondary);margin-top:2px">${r.description}</div>${thresholdInput}</div></div>`;
+  }).join('');
+
+  document.querySelectorAll('.rule-toggle').forEach(btn => {
+    btn.onclick = async () => {
+      btn.classList.toggle('on');
+      btn.classList.toggle('off');
+      const input = document.querySelector(`[data-rule-threshold="${btn.dataset.id}"]`);
+      await postForm('update_rule', { id: btn.dataset.id, active: btn.classList.contains('on') ? 1 : 0, threshold: input ? input.value : btn.dataset.threshold });
+      toast('Rule saved to database');
+    };
+  });
+
+  const auditHtml = (ADMIN_DATA.audit || []).map(l => `<div style="padding:7px 0;border-bottom:1px solid var(--border)"><div style="font-size:10px;color:var(--text-primary)">${l.action}</div><div style="font-size:9px;color:var(--text-dim);margin-top:2px">${fmtDate(l.created_at)} by ${l.user_name}</div></div>`).join('');
+  document.getElementById('audit-log').innerHTML = auditHtml;
+  document.getElementById('admin-actions').innerHTML = auditHtml;
+
+  const metrics = [
+    { label: 'API Response Time', value: 'DB backed', ok: true },
+    { label: 'ML Model Accuracy', value: (settings.model_accuracy || '94.7') + '%', ok: true },
+    { label: 'DB Query Time', value: 'Live', ok: true },
+    { label: 'Queue Depth', value: DASHBOARD_STATS.alerts_open || 0, ok: false },
+    { label: 'Fraud Engine', value: 'ONLINE', ok: true },
+    { label: 'Alert Service', value: 'ONLINE', ok: true },
+  ];
+  document.getElementById('system-health').innerHTML = metrics.map(m => `<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)"><span style="font-size:11px;color:var(--text-secondary)">${m.label}</span><span style="font-size:11px;font-family:var(--font-mono);color:${m.ok ? 'var(--neon-green)' : 'var(--neon-orange)'}">${m.value}</span></div>`).join('');
+
+  destroyChart('model-perf');
+  chartInstances['model-perf'] = new Chart(document.getElementById('chart-model-perf').getContext('2d'), {
+    type: 'radar',
+    data: {
+      labels: ['Precision','Recall','F1 Score','AUC-ROC','Specificity','Accuracy'],
+      datasets: [{ label: 'Model v4.2', data: [settings.model_precision, settings.model_recall, settings.model_f1, settings.model_auc, settings.model_specificity, settings.model_accuracy].map(Number), borderColor: 'rgba(0,200,255,0.8)', backgroundColor: 'rgba(0,200,255,0.1)', pointBackgroundColor: 'rgba(0,200,255,0.8)', borderWidth: 2 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, scales: { r: { min: 70, max: 100, grid: { color: CHART_DEFAULTS.gridColor }, angleLines: { color: CHART_DEFAULTS.gridColor }, ticks: { color: CHART_DEFAULTS.color, font: { family: CHART_DEFAULTS.fontFamily, size: 8 } }, pointLabels: { color: CHART_DEFAULTS.color, font: { family: CHART_DEFAULTS.fontFamily, size: 9 } } } } }
+  });
+}
+async function createTransaction() { const custName=prompt('Customer name'); if(!custName) return; const amount=prompt('Amount'); if(!amount) return; const score=prompt('Fraud probability score 0-99','75'); const method=prompt('Method: P2P, ATM, Mobile, Wire, InStore, Online, POS, Transfer','Online'); const merchant=prompt('Merchant','Manual Entry'); await postForm('insert_transaction',{custName,amount,score,method,merchant,custId:'',account:'',location:'Manual Entry',device:'Analyst Console',ip:'0.0.0.0'}); toast('Transaction inserted into MySQL'); await showPage(ACTIVE_PAGE); }
+async function createCase() { const custId=prompt('Customer ID','CUST-0001'); if(!custId) return; const txId=prompt('Transaction ID','MANUAL'); const fraudAmt=prompt('Fraud amount','1000'); await postForm('insert_case',{custId,txId,fraudAmt,priority:'High',status:'Open',fraudType:'Card Fraud',analyst:CURRENT_USER?.name || 'Sarah Abadi'}); toast('Case inserted into MySQL'); await showPage('cases'); }
+async function createAlert() { const txId=prompt('Transaction ID','MANUAL'); if(!txId) return; const custName=prompt('Customer name','New Customer'); const score=prompt('Score','80'); await postForm('insert_alert',{txId,custName,score,type:'Behavioral'}); toast('Alert inserted into MySQL'); await showPage('alerts'); }
+async function saveAnalystNote() { const note=document.querySelector('#page-analyst textarea')?.value.trim(); if(!note) return; await postForm('save_note',{note,analyst:'Sarah Abadi'}); toast('Note saved to database'); }
+
+async function downloadCSV() { const data=await api('transactions',{page:1,limit:500}); const rows=data.data||[]; if(!rows.length) return; const headers=Object.keys(rows[0]); const csv=[headers.join(','),...rows.map(r=>headers.map(h=>'"'+String(r[h]??'').replaceAll('"','""')+'"').join(','))].join('\n'); const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='transactions.csv'; a.click(); URL.revokeObjectURL(url); }
+async function downloadExcel() { const data=await api('transactions',{page:1,limit:500}); const rows=data.data||[]; if(!rows.length) return; const headers=Object.keys(rows[0]); const tsv=[headers.join('\t'),...rows.map(r=>headers.map(h=>String(r[h]??'')).join('\t'))].join('\n'); const blob=new Blob([tsv],{type:'application/vnd.ms-excel'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='transactions.xls'; a.click(); URL.revokeObjectURL(url); }
+
+async function liveUpdate() { const now=new Date(); document.getElementById('last-update').textContent='UPDATED '+now.toLocaleTimeString('en-US',{hour12:false}); try { await loadDashboardStats(); if(ACTIVE_PAGE==='dashboard') await renderHighRiskTable(); } catch(e) {} }
+
+(function wireRuntimeButtons(){
+  const refreshBtn = Array.from(document.querySelectorAll('#page-dashboard .btn')).find(b=>b.textContent.includes('Refresh')); if(refreshBtn) refreshBtn.onclick=()=>initDashboard();
+  const dashCsv = Array.from(document.querySelectorAll('#page-dashboard .btn')).find(b=>b.textContent.trim()==='CSV'); if(dashCsv) dashCsv.onclick=downloadCSV;
+  const txHeader = document.querySelector('#page-transactions .section-header > div:last-child'); if(txHeader) txHeader.insertAdjacentHTML('afterbegin','<button class="btn btn-primary" onclick="createTransaction()"><i class="fas fa-plus"></i> Add Transaction</button>');
+  const caseBtn = document.querySelector('#page-cases .section-header .btn-primary'); if(caseBtn) caseBtn.onclick=createCase;
+  const alertBtn = document.querySelector('#page-alerts .section-header .btn-primary'); if(alertBtn) alertBtn.onclick=createAlert;
+  const noteBtn = document.querySelector('#page-analyst .btn-primary'); if(noteBtn) noteBtn.onclick=saveAnalystNote;
+})();
+
+// Startup
+(async function startup(){
+  await restoreSession();
+  showPage('dashboard');
+})();
+setInterval(liveUpdate, 5000);
+setTimeout(spawnNotification, 3000);
+</script>
+</body>
+</html>
+
+
+
+
+
+
