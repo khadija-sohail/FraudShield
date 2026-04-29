@@ -2,7 +2,7 @@
 > A full-stack fraud detection and case management platform built with PHP, MySQL, and JavaScript. Designed to replicate the core workflows of real financial crime monitoring systems — transaction scoring, alert queuing, case investigation, analyst task management, and admin controls — dashboard.
 
 ---
-###📑 Table of Contents
+##📑 Table of Contents##
 Overview
 Features
 Tech Stack
@@ -17,7 +17,7 @@ License
 
 
 ---
-###Overview
+##Overview##
 FraudShield simulates an analyst fraud operations center. It covers the full lifecycle of a suspicious financial transaction — from the moment it hits the system with a risk score, through alert creation and analyst assignment, all the way to case resolution and recovery tracking.
 The project was built to understand how real fraud detection systems work in practice: how banks and fintechs triage risk, manage SLA-bound cases, track fraud losses vs. recoveries, and coordinate analyst teams — without relying on third-party fraud APIs.
 ---
