@@ -328,6 +328,13 @@ The fraud types tracked in FraudShield's case management module are based on res
 ---
 ### Roadmap — Future Enhancements
 
+### 🎨 Future Interface Concept
+<p align="center">
+</p><img width="1536" height="1024" alt="frfut" src="https://github.com/user-attachments/assets/a319a53f-be5d-482e-b75d-9a927819d17d" />
+
+
+
+*Visualizing the next generation of the FraudShield Executive Overview, featuring advanced analytics and real-time detection accuracy tracking.*
 This is where the project gets really interesting as We continue studying fraud detection, machine learning, and financial crime. Planned additions:
 
 #### 🤖 Machine Learning Integration
