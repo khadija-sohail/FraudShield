@@ -1,75 +1,102 @@
-🛡️ FraudShield — Fraud Detection & Case Management Dashboard
+# 🛡️ FraudShield — Fraud Detection & Case Management Dashboard
+
 > A full-stack fraud detection and case management platform built with PHP, MySQL, and JavaScript. Designed to replicate the core workflows of real financial crime monitoring systems — transaction scoring, alert queuing, case investigation, analyst task management, and admin controls — dashboard.
 
 ---
-📑 Table of Contents
-Overview
-Features
-Tech Stack
-Database Architecture
-Project Structure
-Getting Started
-How Fraud Scoring Works
-Real-World References & Inspiration
-Fraud Techniques Researched
-Roadmap — Future Enhancements
-License
 
+## 📑 Table of Contents
+
+- Overview
+- Features
+- Tech Stack
+- Database Architecture
+- Project Structure
+- Getting Started
+- How Fraud Scoring Works
+- Real-World References & Inspiration
+- Fraud Techniques Researched
+- Roadmap — Future Enhancements
+- License
 
 ---
-Overview
+
+## Overview
+
 FraudShield simulates an analyst fraud operations center. It covers the full lifecycle of a suspicious financial transaction — from the moment it hits the system with a risk score, through alert creation and analyst assignment, all the way to case resolution and recovery tracking.
+
 The project was built to understand how real fraud detection systems work in practice: how banks and fintechs triage risk, manage SLA-bound cases, track fraud losses vs. recoveries, and coordinate analyst teams — without relying on third-party fraud APIs.
 
 ---
-Features
-🔴 Live Dashboard
-KPI cards: total transactions, fraud events, blocked count, open cases, critical alerts, escalations today
-8 real-time charts (fraud types, daily trend, loss vs recovery, by-channel, weekly cases, monthly cases, recovery rate, analyst performance)
-Auto-refreshing data pulled from MySQL views
-💳 Transaction Monitor
-Full transaction table with pagination, search, and filters (method, risk level, status, min score)
-Risk classification: Critical / High / Medium / Low based on fraud score thresholds
-Status engine: Blocked / Flagged / Under Review / Cleared
-Manual transaction insertion via stored procedure
-🚨 Alert Queue
-Multi-severity alert management: Critical, High, Medium, Low
-Queue statuses: New, Open, Escalated, Resolved, Pending, Investigating
-One-click status updates with audit trail
-📁 Case Management
-Full case lifecycle: Open → Under Review → Investigating → Escalated → Closed
-SLA tracking per priority (Critical: 4h, High: 12h, Medium: 48h, Low: 120h)
-Fraud amount vs. recovered amount tracking
-Analyst assignment via stored procedures
-👤 Customer Intelligence
-Per-customer transaction history (last 40 transactions)
-30-day fraud score trend chart
-Hourly activity heatmap
-Active case linkage
-🔐 Admin Panel
-User management (analysts / admins / managers)
-Fraud rule engine with threshold configuration
-App settings management
-Audit log viewer
-Login history tracking
-Task assignment to analysts
-👨‍💼 Analyst Workspace
-Personal case queue
-Task board with Assigned / In Progress / Done states
-Note-taking per case and per customer
+
+## Features
+
+### 🔴 Live Dashboard
+
+- KPI cards: total transactions, fraud events, blocked count, open cases, critical alerts, escalations today
+- 8 real-time charts (fraud types, daily trend, loss vs recovery, by-channel, weekly cases, monthly cases, recovery rate, analyst performance)
+- Auto-refreshing data pulled from MySQL views
+
+### 💳 Transaction Monitor
+
+- Full transaction table with pagination, search, and filters (method, risk level, status, min score)
+- Risk classification: Critical / High / Medium / Low based on fraud score thresholds
+- Status engine: Blocked / Flagged / Under Review / Cleared
+- Manual transaction insertion via stored procedure
+
+### 🚨 Alert Queue
+
+- Multi-severity alert management: Critical, High, Medium, Low
+- Queue statuses: New, Open, Escalated, Resolved, Pending, Investigating
+- One-click status updates with audit trail
+
+### 📁 Case Management
+
+- Full case lifecycle: Open → Under Review → Investigating → Escalated → Closed
+- SLA tracking per priority (Critical: 4h, High: 12h, Medium: 48h, Low: 120h)
+- Fraud amount vs. recovered amount tracking
+- Analyst assignment via stored procedures
+
+### 👤 Customer Intelligence
+
+- Per-customer transaction history (last 40 transactions)
+- 30-day fraud score trend chart
+- Hourly activity heatmap
+- Active case linkage
+
+### 🔐 Admin Panel
+
+- User management (analysts / admins / managers)
+- Fraud rule engine with threshold configuration
+- App settings management
+- Audit log viewer
+- Login history tracking
+- Task assignment to analysts
+
+### 👨‍💼 Analyst Workspace
+
+- Personal case queue
+- Task board with Assigned / In Progress / Done states
+- Note-taking per case and per customer
 
 ---
-Tech Stack
-Frontend	HTML5, CSS3, JavaScript, Chart.js 
-Backend	PHP (single-file API pattern)
-Database	MySQL with Views, Stored Procedures, and Triggers
-Fonts	Google Fonts (Syne, JetBrains Mono, Space Mono)
-Icons	Font Awesome 6.4
+
+## Tech Stack
+
+| Layer | Technology |
+|------|------------|
+| Frontend | HTML5, CSS3, JavaScript, Chart.js |
+| Backend | PHP (single-file API pattern) |
+| Database | MySQL with Views, Stored Procedures, and Triggers |
+| Fonts | Google Fonts (Syne, JetBrains Mono, Space Mono) |
+| Icons | Font Awesome 6.4 |
 
 ---
-Database Architecture
+
+## Database Architecture
+
 The schema (`fraudshield_schema.sql`) contains 10 tables, 12 views, 4 stored procedures, and 3 triggers.
-```
+
+```text
 fraudshield/
 ├── Tables
 │   ├── users              — Analyst / admin / manager accounts
@@ -109,6 +136,7 @@ fraudshield/
     └── trg_settings_after_update    — Audit on settings change
 ```
 ---
+
 Project Structure
 ```
 fraudshield/
