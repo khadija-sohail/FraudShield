@@ -1,9 +1,10 @@
-<img width="1919" height="862" alt="fraud" src="https://github.com/user-attachments/assets/092e2e7e-ea9e-4f79-bbba-c62b3b47d4bf" /># 🛡️ FraudShield — Fraud Detection & Case Management Dashboard
+# 🛡️ FraudShield — Fraud Detection & Case Management Dashboard
 
-> A full-stack fraud detection and case management platform built with PHP, MySQL, and JavaScript. Designed to replicate the core workflows of real financial crime monitoring systems — transaction scoring, alert queuing, case investigation, analyst task management, and admin controls — dashboard.
+<p align="center">
+  <img width="1000" alt="fraud dashboard" src="https://github.com/user-attachments/assets/092e2e7e-ea9e-4f79-bbba-c62b3b47d4bf" />
+</p>
 
-
-![Alt text](path/to/your/Fraud.png)
+> A full-stack fraud detection and case management platform built with PHP, MySQL, and JavaScript. Designed to replicate the core workflows of real financial crime monitoring systems — transaction scoring, alert queuing, case investigation, analyst task management, and admin controls.
 ---
 
 ## 📑 Table of Contents
