@@ -150,12 +150,15 @@ fraudshield/
 Getting Started
 > **The fastest way:** Use XAMPP (Windows/macOS/Linux). It gives you PHP + MySQL in one installer with zero configuration. The whole setup takes about 5 minutes.
 ---
-🪟 Windows — Using XAMPP (Recommended)
-Step 1 — Download and install XAMPP
-Go to https://www.apachefriends.org and download the Windows installer. Run it and install to the default path `C:\xampp`. During installation, make sure Apache and MySQL are checked.
-Step 2 — Start Apache and MySQL
-Open the XAMPP Control Panel (search for it in Start Menu) and click Start next to both Apache and MySQL. Both status lights should turn green.
-Step 3 — Put the project files in the right folder
+## 🪟 Windows — Using XAMPP (Recommended)
+
+1. **Download and install XAMPP** Go to [apachefriends.org](https://www.apachefriends.org) and download the Windows installer. Run it and install to the default path `C:\xampp`. During installation, make sure Apache and MySQL are checked.
+
+2. **Start Apache and MySQL** Open the XAMPP Control Panel (search for it in your Start Menu) and click **Start** next to both Apache and MySQL. Both status lights should turn green.
+
+3. **Put the project files in the right folder** Copy your project folder (containing `fraud_dashboard.html`, `db.php`, and `fraudshield_schema.sql`) into:  
+   `C:\xampp\htdocs\fraudshield\`
+   
 Copy your project folder (containing `fraud_dashboard.html`, `db.php`, and `fraudshield_schema.sql`) into:
 ```
 C:\xampp\htdocs\fraudshield\
@@ -169,14 +172,12 @@ Step 4 — Open the app in your browser
 ```
 http://localhost/fraudshield/fraud_dashboard.html
 ```
-That's it. On the very first load, `db.php` will automatically create the `fraudshield` database, all tables, views, stored procedures and triggers
----
 macOS — Using XAMPP
-Step 1 — Download XAMPP for macOS
+1.  Download XAMPP for macOS
 Go to https://www.apachefriends.org, download the macOS `.dmg` installer, and drag it to your Applications folder.
-Step 2 — Start the servers
+2. Start the servers
 Open XAMPP from Applications, and in the manager window click Start All (or start Apache and MySQL individually from the Manage Servers tab).
-Step 3 — Copy project files
+3. Copy project files
 ```bash
 # Open terminal and navigate to XAMPP's web root
 cd /Applications/XAMPP/xamppfiles/htdocs
@@ -222,8 +223,10 @@ sudo cp -r /path/to/fraudshield /var/www/html/fraudshield
 
 # Fix permissions
 sudo chown -R www-data:www-data /var/www/html/fraudshield
-```
+``
+`
 Open: `http://localhost/fraudshield/fraud_dashboard.html`
+
 ---
 ⚙️ DB Credentials (All Platforms)
 Open `db.php` in any text editor and check lines 7–9. By default they match a fresh XAMPP install:
@@ -234,18 +237,21 @@ define('DB_PASS', '');        // XAMPP default is blank password
 define('DB_NAME', 'fraudshield');
 ```
 If your MySQL has a root password set, put it in `DB_PASS`. If you want to use a different database user, create one in phpMyAdmin first.
+
 ---
 🗄️ phpMyAdmin (Optional — to view/inspect your database)
 XAMPP includes phpMyAdmin for browsing your database visually:
+
 ```
 http://localhost/phpmyadmin
 ```
 Log in with `root` and your password (blank by default in XAMPP). You'll see the `fraudshield` database appear here after first page load.
+
 ---
-🔑 Demo Login Credentials
-Role	Email	Password
-Admin	admin@fraudshield.io	admin123
-Manager	manager@fraudshield.io	manager123
+| Role | Email | Password |
+| :--- | :--- | :--- |
+| **Admin** | `admin@fraudshield.io` | `admin123` |
+| **Manager** | `manager@fraudshield.io` | `manager123` |
 ---
 How Fraud Scoring Works
 FraudShield uses a rule-based risk score (0–99) to classify each transaction:
