@@ -2,7 +2,7 @@
 > A full-stack fraud detection and case management platform built with PHP, MySQL, and JavaScript. Designed to replicate the core workflows of real financial crime monitoring systems — transaction scoring, alert queuing, case investigation, analyst task management, and admin controls — dashboard.
 
 ---
-##📑 Table of Contents##
+📑 Table of Contents
 Overview
 Features
 Tech Stack
@@ -17,9 +17,10 @@ License
 
 
 ---
-##Overview##
+Overview
 FraudShield simulates an analyst fraud operations center. It covers the full lifecycle of a suspicious financial transaction — from the moment it hits the system with a risk score, through alert creation and analyst assignment, all the way to case resolution and recovery tracking.
 The project was built to understand how real fraud detection systems work in practice: how banks and fintechs triage risk, manage SLA-bound cases, track fraud losses vs. recoveries, and coordinate analyst teams — without relying on third-party fraud APIs.
+
 ---
 Features
 🔴 Live Dashboard
@@ -56,6 +57,7 @@ Task assignment to analysts
 Personal case queue
 Task board with Assigned / In Progress / Done states
 Note-taking per case and per customer
+
 ---
 Tech Stack
 Frontend	HTML5, CSS3, JavaScript, Chart.js 
@@ -63,6 +65,7 @@ Backend	PHP (single-file API pattern)
 Database	MySQL with Views, Stored Procedures, and Triggers
 Fonts	Google Fonts (Syne, JetBrains Mono, Space Mono)
 Icons	Font Awesome 6.4
+
 ---
 Database Architecture
 The schema (`fraudshield_schema.sql`) contains 10 tables, 12 views, 4 stored procedures, and 3 triggers.
@@ -229,29 +232,30 @@ High-Value Transaction — flag any single transaction above a set amount
 Velocity Check — multiple transactions in a short window
 Geographic Anomaly — transaction from an unusual location
 Device Mismatch — transaction from an unrecognized device fingerprint
+
 ---
 Real-World References & Inspiration
 This project was built by researching how production fraud detection systems actually operate. Below are the key resources that shaped the design and logic.
 
-1- ACFE — Report to the Nations 2024:
+1- ACFE — Report to the Nations 2024: 
 https://acfepublic.s3.us-west-2.amazonaws.com/2022+Report+to+the+Nations.pdf
 
-2- IEEE Xplore:
+2- IEEE Xplore: 
 https://ieeexplore.ieee.org/document/11058990
 
-3- Stripe Radar:
+3- Stripe Radar: 
 https://stripe.com/radar/fraud-teams
 
-4- PayPal Fraud & Risk Management:
+4- PayPal Fraud & Risk Management: 
 https://www.paypal.com/us/brc/operations/fraud-management
 
-5- The $81 Million Bangladesh Bank Heist (SWIFT Fraud):
+5- The $81 Million Bangladesh Bank Heist (SWIFT Fraud): 
 https://thehedgefundjournal.com/the-bangladesh-cyberheist/
 
-6- Account Takeover Fraud — FBI IC3 Report:
+6- Account Takeover Fraud — FBI IC3 Report: 
 https://www.fbi.gov/investigate/cyber/alerts/2025/account-takeover-fraud-via-impersonation-of-financial-institution-support
 
-7- Kaggle — IEEE-CIS Fraud Detection:
+7- Kaggle — IEEE-CIS Fraud Detection: 
 https://www.kaggle.com/datasets?search=fraud+detection+in+transactions
 
 ---
@@ -266,6 +270,7 @@ Wire Transfer Fraud	Fraudulent SWIFT/wire instructions, often via BEC	FBI BEC Wi
 Money Muling	Using third-party accounts to move stolen funds	Europol Money Mule Campaign
 First-Party Fraud	Genuine customer intentionally defaults or misrepresents	Experian First-Party Fraud
 Bust-Out Fraud	Building up credit then maxing it out with no intent to repay	ACFE Fraud Examiners Manual
+
 ---
 Roadmap — Future Enhancements
 This is where the project gets really interesting as We continue studying fraud detection, machine learning, and financial crime. Planned additions:
@@ -307,6 +312,7 @@ Reference: SWIFT gpi Documentation
 [ ] Open Banking / PSD2 — How Strong Customer Authentication (SCA) requirements in Europe affect fraud patterns
 Reference: EBA PSD2 Guidelines
 [ ] OSINT APIs — Integrate IP reputation (AbuseIPDB), email age (EmailAge), and phone carrier lookup into scoring
+
 ---
 
 License
@@ -314,7 +320,7 @@ This project is licensed under the MIT License. Free to use for learning, portfo
 ---
 <div align="center">
 KHADIJA SOHAIL
-MANAL IMRAN
-FATIMA KAMRAN  
-MAHNOOR MAZHAR  
+, MANAL IMRAN
+, FATIMA KAMRAN  
+, MAHNOOR MAZHAR  
 </div>
