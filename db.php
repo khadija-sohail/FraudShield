@@ -335,6 +335,7 @@ function seedDemoData(PDO $pdo): void {
 
     // ── Helper: parse a CSV file into an array of associative rows ──────────
     $readCsv = function(string $path): array {
+        if (!is_readable($path)) return [];
         $rows = []; $handle = fopen($path, 'r');
         if (!$handle) return $rows;
         $headers = fgetcsv($handle);
@@ -348,9 +349,9 @@ function seedDemoData(PDO $pdo): void {
 
     // ── Resolve CSV paths (same directory as db.php, or override below) ─────
     $baseDir = __DIR__;
-    $csvTransactions = $baseDir . '/data/transactions.csv';
-    $csvCases        = $baseDir . '/data/cases.csv';
-    $csvAlerts       = $baseDir . '/data/alerts.csv';
+    $csvTransactions = $baseDir . '/transactions.csv';
+    $csvCases        = $baseDir . '/cases.csv';
+    $csvAlerts       = $baseDir . '/alerts.csv';
 
     // ── 1. TRANSACTIONS ──────────────────────────────────────────────────────
     $txRows = $readCsv($csvTransactions);
