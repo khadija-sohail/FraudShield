@@ -3,10 +3,12 @@ session_start();
 // ============================================================
 // FraudShield - MySQL API + self-initializing schema
 // ============================================================
-define('DB_HOST', 'localhost');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_NAME', 'fraudshield');
+define('DB_HOST', getenv('MYSQLHOST') ?: getenv('DB_HOST') ?: 'localhost');
+define('DB_PORT', getenv('MYSQLPORT') ?: getenv('DB_PORT') ?: '3306');
+define('DB_USER', getenv('MYSQLUSER') ?: getenv('DB_USER') ?: 'root');
+define('DB_PASS', getenv('MYSQLPASSWORD') ?: getenv('DB_PASS') ?: '');
+define('DB_NAME', getenv('MYSQLDATABASE') ?: getenv('DB_NAME') ?: 'fraudshield');
+define('DB_AUTO_CREATE', (getenv('DB_AUTO_CREATE') ?: (DB_HOST === 'localhost' ? 'true' : 'false')) === 'true');
 
 function jsonOut($payload, int $code = 200): void {
     http_response_code($code);
@@ -34,13 +36,21 @@ function getDB(): PDO {
     static $pdo = null;
     if ($pdo) return $pdo;
     try {
-        $server = new PDO('mysql:host=' . DB_HOST . ';charset=utf8mb4', DB_USER, DB_PASS, [
+        $dsn = 'mysql:host=' . DB_HOST . ';port=' . DB_PORT . ';charset=utf8mb4';
+        if (!DB_AUTO_CREATE) {
+            $dsn .= ';dbname=' . DB_NAME;
+        }
+
+        $server = new PDO($dsn, DB_USER, DB_PASS, [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
             PDO::ATTR_EMULATE_PREPARES => false,
         ]);
-        $server->exec('CREATE DATABASE IF NOT EXISTS `' . DB_NAME . '` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci');
-        $server->exec('USE `' . DB_NAME . '`');
+        if (DB_AUTO_CREATE) {
+            $dbName = str_replace('`', '``', DB_NAME);
+            $server->exec('CREATE DATABASE IF NOT EXISTS `' . $dbName . '` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci');
+            $server->exec('USE `' . $dbName . '`');
+        }
         $pdo = $server;
         ensureSchema($pdo);
         ensureDatabaseLogic($pdo);

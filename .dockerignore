@@ -1,0 +1,6 @@
+.git
+.gitignore
+outputs/
+*.docx
+*.log
+.env
