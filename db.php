@@ -331,7 +331,12 @@ function logLogin(PDO $pdo, ?array $user, string $email, bool $success): void {
 }
 
 function seedDemoData(PDO $pdo): void {
-    if ((int)$pdo->query('SELECT COUNT(*) FROM transactions')->fetchColumn() > 0) return;
+    // Seed metadata: lets us safely switch seed sources once.
+    $pdo->exec("CREATE TABLE IF NOT EXISTS seed_meta (
+        seed_key VARCHAR(40) PRIMARY KEY,
+        seed_value VARCHAR(255) NOT NULL,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB");
 
     // ── Helper: parse a CSV file into an array of associative rows ──────────
     $readCsv = function(string $path): array {
@@ -347,11 +352,368 @@ function seedDemoData(PDO $pdo): void {
         fclose($handle); return $rows;
     };
 
-    // ── Resolve CSV paths (same directory as db.php, or override below) ─────
+    // ── Seed source: prefer seed_data_csv/gen_*.csv if present ──────────────
     $baseDir = __DIR__;
+    $seedDir = $baseDir . '/seed_data_csv';
+
+    $hasGenSeeds =
+        is_readable($seedDir . '/gen_users.csv') &&
+        is_readable($seedDir . '/gen_transactions.csv') &&
+        is_readable($seedDir . '/gen_fraud_cases.csv') &&
+        is_readable($seedDir . '/gen_alerts.csv');
+
+    // Legacy demo seed files (kept for compatibility)
     $csvTransactions = $baseDir . '/transactions.csv';
     $csvCases        = $baseDir . '/cases.csv';
     $csvAlerts       = $baseDir . '/alerts.csv';
+
+    // ── Helpers for gen_* normalization into FraudShield enums ──────────────
+    $toDateTime = function($v): string {
+        $v = trim((string)$v);
+        if ($v === '') return date('Y-m-d H:i:s');
+        $ts = strtotime($v);
+        if ($ts !== false) return date('Y-m-d H:i:s', $ts);
+        // handle dd/mm/yyyy hh:mm (common in gen_users.csv)
+        if (preg_match('/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})$/', $v, $m)) {
+            return "{$m[3]}-{$m[2]}-{$m[1]} {$m[4]}:{$m[5]}:00";
+        }
+        return date('Y-m-d H:i:s');
+    };
+    $custIdFromUserId = fn(int $uid): string => 'CUST-' . str_pad((string)$uid, 4, '0', STR_PAD_LEFT);
+    $txIdFromInt = fn(int $id): string => 'TX-' . str_pad((string)$id, 6, '0', STR_PAD_LEFT);
+    $caseIdFromInt = fn(int $id): string => 'CASE-' . str_pad((string)$id, 4, '0', STR_PAD_LEFT);
+    $alertIdFromInt = fn(int $id): string => 'ALT-' . str_pad((string)$id, 4, '0', STR_PAD_LEFT);
+
+    $methodMap = [
+        'credit_card' => 'POS',
+        'debit_card' => 'POS',
+        'bank_transfer' => 'Wire',
+        'wire_transfer' => 'Wire',
+        'online_payment' => 'Online',
+        'cash_withdrawal' => 'ATM',
+    ];
+    $deviceMap = [
+        'mobile' => 'Mobile',
+        'desktop' => 'Desktop',
+        'tablet' => 'Tablet',
+        'web' => 'Web',
+        'iphone' => 'Mobile',
+        'android' => 'Mobile',
+    ];
+    $priorityMap = [
+        'critical' => 'Critical',
+        'high' => 'High',
+        'medium' => 'Medium',
+        'low' => 'Low',
+    ];
+    $caseStatusMap = [
+        'open' => 'Open',
+        'investigating' => 'Investigating',
+        'under_review' => 'Under Review',
+        'pending_docs' => 'Pending Docs',
+        'escalated' => 'Escalated',
+        'closed' => 'Closed',
+    ];
+    $alertSeverityMap = $priorityMap;
+    $queueStatusMap = [
+        'new' => 'New',
+        'open' => 'Open',
+        'pending' => 'Pending',
+        'investigating' => 'Investigating',
+        'escalated' => 'Escalated',
+        'resolved' => 'Resolved',
+        'closed' => 'Resolved',
+    ];
+    $fraudTypeMap = [
+        'account_takeover' => 'Account Takeover',
+        'payment_fraud' => 'Payment Fraud',
+        'identity_theft' => 'Identity Theft',
+        'stolen_card' => 'Stolen Card',
+        'wire_fraud' => 'Wire Transfer Fraud',
+    ];
+
+    if ($hasGenSeeds) {
+        // If we previously seeded legacy demo data, replace it once with gen_*.
+        $currentSeed = null;
+        try {
+            $stmt = $pdo->prepare("SELECT seed_value FROM seed_meta WHERE seed_key='source' LIMIT 1");
+            $stmt->execute();
+            $currentSeed = $stmt->fetchColumn() ?: null;
+        } catch (PDOException $e) {}
+
+        if ($currentSeed !== 'gen') {
+            // Wipe only the app's operational tables before re-seeding.
+            // This avoids mixing incompatible demo and gen_* datasets.
+            $pdo->exec("SET FOREIGN_KEY_CHECKS=0");
+            foreach ([
+                'analyst_tasks',
+                'analyst_notes',
+                'login_history',
+                'audit_log',
+                'alerts',
+                'cases',
+                'transactions',
+                'fraud_rules',
+                'app_settings',
+                'users',
+            ] as $tbl) {
+                try { $pdo->exec("TRUNCATE TABLE `$tbl`"); } catch (PDOException $e) {}
+            }
+            $pdo->exec("SET FOREIGN_KEY_CHECKS=1");
+
+            $pdo->prepare("INSERT INTO seed_meta (seed_key, seed_value) VALUES ('source','gen')
+                           ON DUPLICATE KEY UPDATE seed_value=VALUES(seed_value)")
+                ->execute();
+        } else {
+            // Already seeded from gen_*; avoid re-seeding on every request.
+            if ((int)$pdo->query('SELECT COUNT(*) FROM transactions')->fetchColumn() > 0) return;
+        }
+
+        // ── Load gen_* sources ──────────────────────────────────────────────
+        $genUsers       = $readCsv($seedDir . '/gen_users.csv');
+        $genAnalysts    = $readCsv($seedDir . '/gen_analysts.csv');
+        $genAccounts    = $readCsv($seedDir . '/gen_accounts.csv');
+        $genTx          = $readCsv($seedDir . '/gen_transactions.csv');
+        $genCases       = $readCsv($seedDir . '/gen_fraud_cases.csv');
+        $genAlerts      = $readCsv($seedDir . '/gen_alerts.csv');
+        $genNotes       = $readCsv($seedDir . '/gen_notes.csv');
+        $genRecoveries  = $readCsv($seedDir . '/gen_recoveries.csv');
+        $genLogins      = $readCsv($seedDir . '/gen_login_activity.csv');
+        $genRules       = $readCsv($seedDir . '/gen_fraud_rules.csv');
+
+        // ── Insert users (only staff roles are relevant for app logins) ─────
+        $staffInsert = $pdo->prepare('INSERT IGNORE INTO users (id, full_name, email, password, role, status) VALUES (?,?,?,?,?,?)');
+        $userNameById = [];
+        $userEmailById = [];
+        $userRoleById = [];
+
+        foreach ($genUsers as $u) {
+            $uid = (int)($u['user_id'] ?? 0);
+            if (!$uid) continue;
+            $name = trim((string)($u['full_name'] ?? ''));
+            $email = trim((string)($u['email'] ?? ''));
+            $roleRaw = strtolower(trim((string)($u['role'] ?? '')));
+            $statusRaw = strtolower(trim((string)($u['status'] ?? 'active')));
+
+            $userNameById[$uid] = $name ?: ('User ' . $uid);
+            $userEmailById[$uid] = $email ?: ('user' . $uid . '@example.local');
+            $userRoleById[$uid] = $roleRaw ?: 'customer';
+
+            // map dataset roles → FraudShield roles
+            $role = 'analyst';
+            if (in_array($roleRaw, ['admin','manager'], true)) $role = $roleRaw;
+            elseif (in_array($roleRaw, ['analyst','support','investigator'], true)) $role = 'analyst';
+            else continue; // customers are not inserted into app `users`
+
+            $status = ($statusRaw === 'active') ? 'active' : 'disabled';
+            // Seeded passwords: set a known default so logins work
+            $pass = password_hash('admin123', PASSWORD_BCRYPT);
+            if ($role === 'analyst') $pass = password_hash('analyst123', PASSWORD_BCRYPT);
+            if ($role === 'manager') $pass = password_hash('manager123', PASSWORD_BCRYPT);
+
+            $staffInsert->execute([$uid, $userNameById[$uid], $userEmailById[$uid], $pass, $role, $status]);
+        }
+
+        // ensure documented admin account exists
+        $adminPass = password_hash('admin123', PASSWORD_BCRYPT);
+        $pdo->prepare('INSERT IGNORE INTO users (full_name,email,password,role,status) VALUES (?,?,?,?,?)')
+            ->execute(['System Admin', 'admin@fraudshield.com', $adminPass, 'admin', 'active']);
+
+        // ── Analysts lookup (analyst_id -> analyst_name) ────────────────────
+        $analystNameByAnalystId = [];
+        foreach ($genAnalysts as $a) {
+            $aid = (int)($a['analyst_id'] ?? 0);
+            $uid = (int)($a['user_id'] ?? 0);
+            if ($aid && $uid && isset($userNameById[$uid])) {
+                $analystNameByAnalystId[$aid] = $userNameById[$uid];
+            }
+        }
+
+        // ── Accounts lookup (account_id -> account_number) ──────────────────
+        $accountNumberById = [];
+        foreach ($genAccounts as $a) {
+            $aid = (int)($a['account_id'] ?? 0);
+            if (!$aid) continue;
+            $accountNumberById[$aid] = (string)($a['account_number'] ?? '');
+        }
+
+        // ── Insert transactions into app table ──────────────────────────────
+        $txStmt = $pdo->prepare(
+            'INSERT IGNORE INTO transactions
+             (id,custId,custName,account,method,merchant,location,device,ip,amount,score,risk,status,dt)
+             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
+        );
+
+        $txScoreByIntId = [];
+        foreach ($genTx as $t) {
+            $tidInt = (int)($t['transaction_id'] ?? 0);
+            if (!$tidInt) continue;
+            $uid = (int)($t['user_id'] ?? 0);
+            $acctId = (int)($t['account_id'] ?? 0);
+
+            $prob = (float)($t['fraud_probability'] ?? 0);
+            $score = (int)round(max(0, min(0.9999, $prob)) * 99);
+            $txScoreByIntId[$tidInt] = $score;
+
+            $methodRaw = strtolower(trim((string)($t['method'] ?? 'online_payment')));
+            $method = $methodMap[$methodRaw] ?? 'Online';
+
+            $deviceRaw = strtolower(trim((string)($t['device'] ?? 'web')));
+            $device = $deviceMap[$deviceRaw] ?? 'Web';
+
+            $dt = $toDateTime($t['created_at'] ?? '');
+
+            $txStmt->execute([
+                $txIdFromInt($tidInt),
+                $custIdFromUserId($uid ?: $tidInt),
+                $userNameById[$uid] ?? ('Customer ' . ($uid ?: $tidInt)),
+                $accountNumberById[$acctId] ?? ('ACC-' . str_pad((string)$acctId, 6, '0', STR_PAD_LEFT)),
+                $method,
+                (string)($t['merchant'] ?? 'Unknown'),
+                (string)($t['location'] ?? 'Unknown'),
+                $device,
+                (string)($t['ip_address'] ?? '0.0.0.0'),
+                (float)($t['amount'] ?? 0),
+                $score,
+                riskFromScore($score),
+                statusFromScore($score),
+                $dt,
+            ]);
+        }
+
+        // ── Insert cases into app table ─────────────────────────────────────
+        $caseStmt = $pdo->prepare(
+            'INSERT IGNORE INTO cases
+             (id,custId,txId,opened,status,priority,fraudType,fraudAmt,analyst,resolution,recoveredAmt,sla,slaOverdue)
+             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)'
+        );
+        foreach ($genCases as $c) {
+            $cidInt = (int)($c['case_id'] ?? 0);
+            if (!$cidInt) continue;
+            $uid = (int)($c['user_id'] ?? 0);
+            $tidInt = (int)($c['transaction_id'] ?? 0);
+            $priorityRaw = strtolower(trim((string)($c['priority'] ?? 'medium')));
+            $priority = $priorityMap[$priorityRaw] ?? 'Medium';
+
+            $statusRaw = strtolower(trim((string)($c['status'] ?? 'open')));
+            $status = $caseStatusMap[$statusRaw] ?? 'Open';
+
+            $fraudTypeRaw = strtolower(trim((string)($c['fraud_type'] ?? 'payment_fraud')));
+            $fraudType = $fraudTypeMap[$fraudTypeRaw] ?? ucwords(str_replace('_', ' ', $fraudTypeRaw));
+
+            $opened = date('Y-m-d', strtotime($toDateTime($c['created_at'] ?? '')));
+            $analystId = (int)($c['assigned_analyst_id'] ?? 0);
+            $analystName = $analystNameByAnalystId[$analystId] ?? 'Sarah Abadi';
+
+            $sla = ($priority === 'Critical') ? '4h' : (($priority === 'High') ? '12h' : (($priority === 'Medium') ? '48h' : '120h'));
+            $caseStmt->execute([
+                $caseIdFromInt($cidInt),
+                $custIdFromUserId($uid ?: $cidInt),
+                $txIdFromInt($tidInt ?: 1),
+                $opened,
+                $status,
+                $priority,
+                $fraudType,
+                (float)($c['fraud_amount'] ?? 0),
+                $analystName,
+                'Pending',
+                (float)($c['recovery_amount'] ?? 0),
+                $sla,
+                0,
+            ]);
+        }
+
+        // ── Insert alerts into app table ────────────────────────────────────
+        $alertStmt = $pdo->prepare(
+            'INSERT IGNORE INTO alerts
+             (id,txId,custName,type,severity,score,analyst,queueStatus,minsOpen,dt)
+             VALUES (?,?,?,?,?,?,?,?,?,?)'
+        );
+        foreach ($genAlerts as $a) {
+            $aidInt = (int)($a['alert_id'] ?? 0);
+            if (!$aidInt) continue;
+            $tidInt = (int)($a['transaction_id'] ?? 0);
+            $severityRaw = strtolower(trim((string)($a['severity'] ?? 'medium')));
+            $severity = $alertSeverityMap[$severityRaw] ?? 'Medium';
+
+            $queueRaw = strtolower(trim((string)($a['queue_status'] ?? 'new')));
+            $queueStatus = $queueStatusMap[$queueRaw] ?? 'New';
+
+            $analystId = (int)($a['analyst_id'] ?? 0);
+            $analystName = $analystNameByAnalystId[$analystId] ?? 'Unassigned';
+
+            $dt = $toDateTime($a['created_at'] ?? '');
+            $score = $txScoreByIntId[$tidInt] ?? 60;
+
+            $alertStmt->execute([
+                $alertIdFromInt($aidInt),
+                $txIdFromInt($tidInt ?: 1),
+                'Customer',
+                ucwords(str_replace('_',' ', (string)($a['alert_type'] ?? 'behavioral'))),
+                $severity,
+                $score,
+                $analystName,
+                $queueStatus,
+                0,
+                $dt,
+            ]);
+        }
+
+        // ── Fraud rules (replace defaults with dataset if provided) ─────────
+        if ($genRules) {
+            $pdo->exec('DELETE FROM fraud_rules');
+            $ruleStmt = $pdo->prepare('INSERT INTO fraud_rules (id,name,threshold_value,active,description) VALUES (?,?,?,?,?)');
+            foreach ($genRules as $r) {
+                $rid = (int)($r['rule_id'] ?? 0);
+                if (!$rid) continue;
+                $ruleStmt->execute([
+                    $rid,
+                    (string)($r['rule_name'] ?? ('Rule ' . $rid)),
+                    (float)($r['threshold'] ?? 0),
+                    (int)($r['active'] ?? 1),
+                    'Seeded from gen_fraud_rules.csv',
+                ]);
+            }
+        }
+
+        // ── Analyst notes (map to analyst_notes) ────────────────────────────
+        if ($genNotes) {
+            $noteStmt = $pdo->prepare('INSERT INTO analyst_notes (case_id,customer_id,note,analyst) VALUES (?,?,?,?)');
+            foreach ($genNotes as $n) {
+                $caseInt = (int)($n['case_id'] ?? 0);
+                $analystId = (int)($n['analyst_id'] ?? 0);
+                $noteStmt->execute([
+                    $caseInt ? $caseIdFromInt($caseInt) : null,
+                    null,
+                    (string)($n['note_text'] ?? ''),
+                    $analystNameByAnalystId[$analystId] ?? 'Sarah Abadi',
+                ]);
+            }
+        }
+
+        // ── Login activity (map to login_history) ───────────────────────────
+        if ($genLogins) {
+            $loginStmt = $pdo->prepare('INSERT INTO login_history (user_id,email,role,success,ip,created_at) VALUES (?,?,?,?,?,?)');
+            foreach ($genLogins as $l) {
+                $uid = (int)($l['user_id'] ?? 0);
+                $loginStmt->execute([
+                    $uid ?: null,
+                    $userEmailById[$uid] ?? ('user' . $uid . '@example.local'),
+                    $userRoleById[$uid] ?? 'unknown',
+                    (int)($l['success'] ?? 0),
+                    (string)($l['ip'] ?? '0.0.0.0'),
+                    $toDateTime($l['login_time'] ?? ''),
+                ]);
+            }
+        }
+
+        // Recoveries: also update case recoveredAmt already set from cases CSV
+        audit($pdo, 'Database seeded from seed_data_csv/gen_*.csv');
+        return;
+    }
+
+    // If gen_* seeds are not present, keep legacy behavior (seed only if empty).
+    if ((int)$pdo->query('SELECT COUNT(*) FROM transactions')->fetchColumn() > 0) return;
 
     // ── 1. TRANSACTIONS ──────────────────────────────────────────────────────
     $txRows = $readCsv($csvTransactions);
