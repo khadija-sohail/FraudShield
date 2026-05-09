@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -2040,7 +2040,7 @@ this is html code upper navigation bar
       <div class="section-meta">REAL-TIME · AUTO-ASSIGN </div>
     </div>
     <div style="display:flex;gap:8px">
-      <button class="btn btn-outline"><i class="fas fa-filter"></i> Bulk Action</button>
+      <button class="btn btn-outline" onclick="bulkResolveAlerts()"><i class="fas fa-filter"></i> Bulk Action</button>
       <button class="btn btn-primary"><i class="fas fa-plus"></i> Create Alert</button>
     </div>
   </div>
@@ -2357,8 +2357,8 @@ this is html code upper navigation bar
     <div class="glass-card p20">
       <div class="chart-title mb16"><i class="fas fa-users" style="color:var(--neon-blue);margin-right:8px"></i>User Management</div>
       <div style="font-size:11px;color:var(--text-secondary);margin-bottom:12px">25 analysts Â· 3 admins Â· 9,847 customers</div>
-      <button class="btn btn-primary" style="width:100%;justify-content:center;margin-bottom:8px"><i class="fas fa-user-plus"></i> Create Analyst</button>
-      <button class="btn btn-outline" style="width:100%;justify-content:center"><i class="fas fa-key"></i> Manage Roles</button>
+      <button class="btn btn-primary" onclick="createAnalyst()" style="width:100%;justify-content:center;margin-bottom:8px"><i class="fas fa-user-plus"></i> Create Analyst</button>
+      <button class="btn btn-outline" onclick="manageRoles()" style="width:100%;justify-content:center"><i class="fas fa-key"></i> Manage Roles</button>
       <div id="admin-analysts-list" style="margin-top:12px;max-height:220px;overflow-y:auto"></div>
     </div>
     <div class="glass-card p20">
@@ -4125,10 +4125,100 @@ async function initAdmin() {
     options: { responsive: true, maintainAspectRatio: false, scales: { r: { min: 70, max: 100, grid: { color: CHART_DEFAULTS.gridColor }, angleLines: { color: CHART_DEFAULTS.gridColor }, ticks: { color: CHART_DEFAULTS.color, font: { family: CHART_DEFAULTS.fontFamily, size: 8 } }, pointLabels: { color: CHART_DEFAULTS.color, font: { family: CHART_DEFAULTS.fontFamily, size: 9 } } } } }
   });
 }
-async function createTransaction() { const custName=prompt('Customer name'); if(!custName) return; const amount=prompt('Amount'); if(!amount) return; const score=prompt('Fraud probability score 0-99','75'); const method=prompt('Method: P2P, ATM, Mobile, Wire, InStore, Online, POS, Transfer','Online'); const merchant=prompt('Merchant','Manual Entry'); await postForm('insert_transaction',{custName,amount,score,method,merchant,custId:'',account:'',location:'Manual Entry',device:'Analyst Console',ip:'0.0.0.0'}); toast('Transaction inserted into MySQL'); await showPage(ACTIVE_PAGE); }
-async function createCase() { const custId=prompt('Customer ID','CUST-0001'); if(!custId) return; const txId=prompt('Transaction ID','MANUAL'); const fraudAmt=prompt('Fraud amount','1000'); await postForm('insert_case',{custId,txId,fraudAmt,priority:'High',status:'Open',fraudType:'Card Fraud',analyst:CURRENT_USER?.name || 'Sarah Abadi'}); toast('Case inserted into MySQL'); await showPage('cases'); }
-async function createAlert() { const txId=prompt('Transaction ID','MANUAL'); if(!txId) return; const custName=prompt('Customer name','New Customer'); const score=prompt('Score','80'); await postForm('insert_alert',{txId,custName,score,type:'Behavioral'}); toast('Alert inserted into MySQL'); await showPage('alerts'); }
-async function saveAnalystNote() { const note=document.querySelector('#page-analyst textarea')?.value.trim(); if(!note) return; await postForm('save_note',{note,analyst:'Sarah Abadi'}); toast('Note saved to database'); }
+async function createTransaction() {
+  try {
+    const custName = prompt('Customer name');
+    if(!custName) return;
+    const amount = prompt('Amount');
+    if(!amount) return;
+    const score = prompt('Fraud probability score 0-99','75');
+    const method = prompt('Method: P2P, ATM, Mobile, Wire, InStore, Online, POS, Transfer','Online');
+    const merchant = prompt('Merchant','Manual Entry');
+    const result = await postForm('insert_transaction',{custName,amount,score,method,merchant,custId:'',account:'',location:'Manual Entry',device:'Analyst Console',ip:'0.0.0.0'});
+    toast('Transaction ' + result.id + ' inserted into MySQL');
+    await showPage(ACTIVE_PAGE);
+  } catch(err) {
+    toast(err.message || 'Transaction was not saved', false);
+  }
+}
+
+async function createCase() {
+  try {
+    const custId = prompt('Customer ID','CUST-0001');
+    if(!custId) return;
+    const txId = prompt('Transaction ID','MANUAL') || 'MANUAL';
+    const fraudAmt = prompt('Fraud amount','1000') || '0';
+    const priority = prompt('Priority: Critical, High, Medium, Low','High') || 'High';
+    const fraudType = prompt('Fraud type','Card Fraud') || 'Card Fraud';
+    const result = await postForm('insert_case',{custId,txId,fraudAmt,priority,status:'Open',fraudType,analyst:CURRENT_USER?.name || 'Sarah Abadi'});
+    const caseSearch = document.getElementById('case-search');
+    if(caseSearch && result.id) caseSearch.value = result.id;
+    toast('Case ' + result.id + ' inserted into MySQL');
+    await showPage('cases');
+  } catch(err) {
+    toast(err.message || 'Case was not saved', false);
+  }
+}
+
+async function createAlert() {
+  try {
+    const txId = prompt('Transaction ID','MANUAL');
+    if(!txId) return;
+    const custName = prompt('Customer name','New Customer');
+    const score = prompt('Score','80');
+    const result = await postForm('insert_alert',{txId,custName,score,type:'Behavioral'});
+    toast('Alert ' + result.id + ' inserted into MySQL');
+    await showPage('alerts');
+  } catch(err) {
+    toast(err.message || 'Alert was not saved', false);
+  }
+}
+
+async function createAnalyst() {
+  try {
+    const name = prompt('Analyst full name');
+    if(!name) return;
+    const email = prompt('Analyst email');
+    if(!email) return;
+    const password = prompt('Temporary password, minimum 6 characters','analyst123');
+    if(!password) return;
+    const result = await postForm('signup', { name, email, password });
+    if(!result.success) throw new Error(result.error || 'Analyst was not created');
+    toast('Analyst saved into MySQL');
+    if(ACTIVE_PAGE === 'admin') await initAdmin();
+  } catch(err) {
+    toast(err.message || 'Analyst was not saved', false);
+  }
+}
+
+function manageRoles() {
+  toast('Role changes are handled from MySQL users; create analyst now saves accounts.', true);
+}
+
+async function bulkResolveAlerts() {
+  try {
+    const rows = filteredAlerts || [];
+    const openRows = rows.filter(a => a.queueStatus !== 'Resolved').slice(0, 10);
+    if(!openRows.length) return toast('No visible open alerts to resolve', false);
+    for(const alert of openRows) await postForm('update_alert', { id: alert.id, status: 'Resolved' });
+    toast(openRows.length + ' visible alerts resolved in MySQL');
+    await loadAlerts();
+    await loadDashboardStats();
+  } catch(err) {
+    toast(err.message || 'Bulk action failed', false);
+  }
+}
+
+async function saveAnalystNote() {
+  try {
+    const note = document.querySelector('#page-analyst textarea')?.value.trim();
+    if(!note) return toast('Enter a note first', false);
+    await postForm('save_note',{note,analyst:CURRENT_USER?.name || 'Sarah Abadi'});
+    toast('Note saved to database');
+  } catch(err) {
+    toast(err.message || 'Note was not saved', false);
+  }
+}
 
 async function downloadCSV() { const data=await api('transactions',{page:1,limit:500}); const rows=data.data||[]; if(!rows.length) return; const headers=Object.keys(rows[0]); const csv=[headers.join(','),...rows.map(r=>headers.map(h=>'"'+String(r[h]??'').replaceAll('"','""')+'"').join(','))].join('\n'); const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='transactions.csv'; a.click(); URL.revokeObjectURL(url); }
 async function downloadExcel() { const data=await api('transactions',{page:1,limit:500}); const rows=data.data||[]; if(!rows.length) return; const headers=Object.keys(rows[0]); const tsv=[headers.join('\t'),...rows.map(r=>headers.map(h=>String(r[h]??'')).join('\t'))].join('\n'); const blob=new Blob([tsv],{type:'application/vnd.ms-excel'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='transactions.xls'; a.click(); URL.revokeObjectURL(url); }
@@ -4154,9 +4244,6 @@ setTimeout(spawnNotification, 3000);
 </script>
 </body>
 </html>
-
-
-
 
 
 
